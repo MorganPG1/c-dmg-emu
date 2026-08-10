@@ -49,22 +49,32 @@ typedef enum {
     COND_Z,
     COND_NC,
     COND_C
-} conditions;
+} condition;
+
+typedef enum {
+    FLAG_ZERO,
+    FLAG_SUB,
+    FLAG_HALF_CARRY,
+    FLAG_CARRY
+} flags;
 
 // Helper functions
 uint8_t read_imm8(dmg_gameboy_t *gb);
 uint16_t read_imm16(dmg_gameboy_t *gb);
 
-uint8_t get_val_r8(dmg_gameboy_t *gb, uint8_t reg_idx);
-void set_val_r8(dmg_gameboy_t *gb, uint8_t reg_idx, uint8_t val);
-uint16_t get_val_r16(dmg_gameboy_t *gb, uint8_t reg_idx);
-void set_val_r16(dmg_gameboy_t *gb, uint8_t reg_idx, uint16_t val);
-uint16_t get_val_r16stk(dmg_gameboy_t *gb, uint8_t reg_idx);
-void set_val_r16stk(dmg_gameboy_t *gb, uint8_t reg_idx, uint16_t val);
-uint8_t get_val_r16mem(dmg_gameboy_t *gb, uint8_t reg_idx);
-void set_val_r16mem(dmg_gameboy_t *gb, uint8_t reg_idx, uint8_t val);
-bool check_condition(dmg_gameboy_t *gb, uint8_t cond_idx);
+uint8_t get_val_r8(dmg_gameboy_t *gb, reg_r8 reg_idx);
+void set_val_r8(dmg_gameboy_t *gb, reg_r8 reg_idx, uint8_t val);
+uint16_t get_val_r16(dmg_gameboy_t *gb, reg_r16 reg_idx);
+void set_val_r16(dmg_gameboy_t *gb, reg_r16 reg_idx, uint16_t val);
+uint16_t get_val_r16stk(dmg_gameboy_t *gb, reg_r16stk reg_idx);
+void set_val_r16stk(dmg_gameboy_t *gb, reg_r16stk reg_idx, uint16_t val);
+uint8_t get_val_r16mem(dmg_gameboy_t *gb, reg_r16mem reg_idx);
+void set_val_r16mem(dmg_gameboy_t *gb, reg_r16mem reg_idx, uint8_t val);
+bool check_condition(dmg_gameboy_t *gb, condition cond_idx);
 
+void set_flag(dmg_gameboy_t *gb, flags flag_ind);
+void clear_flag(dmg_gameboy_t *gb, flags flag_ind);
+void update_flag(dmg_gameboy_t *gb, flags flag_ind, bool condition);
 // Instruction functions
 // Block 0
 void handle_ld_r16_imm16(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);

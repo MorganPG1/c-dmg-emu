@@ -6,16 +6,22 @@
 
 uint8_t read_imm8(dmg_gameboy_t *gb) {
     uint8_t val = read_mem_8b(gb, gb->pc);
-    gb->pc++;
+    
+    if (!gb->halt_bug) {
+        gb->pc++;
+    }
+    
     return val;
 }
 
 uint16_t read_imm16(dmg_gameboy_t *gb) {
-    uint16_t val = read_mem_16b(gb, gb->pc);
-    gb->pc+=2;
+    uint8_t low = read_imm8(gb);
+    uint8_t high = read_imm8(gb);
+    uint16_t val = low | (high << 7);
     return val;
 }
-uint8_t get_val_r8(dmg_gameboy_t *gb, uint8_t reg_idx) {
+
+uint8_t get_val_r8(dmg_gameboy_t *gb, reg_r8 reg_idx) {
     switch (reg_idx) {
         case REG_B:
             return gb->b;
@@ -39,7 +45,7 @@ uint8_t get_val_r8(dmg_gameboy_t *gb, uint8_t reg_idx) {
     }
 }
 
-void set_val_r8(dmg_gameboy_t *gb, uint8_t reg_idx, uint8_t val) {
+void set_val_r8(dmg_gameboy_t *gb, reg_r8 reg_idx, uint8_t val) {
     switch (reg_idx) {
         case REG_B:
             gb->b = val;
@@ -71,7 +77,7 @@ void set_val_r8(dmg_gameboy_t *gb, uint8_t reg_idx, uint8_t val) {
     }
 }
 
-uint16_t get_val_r16(dmg_gameboy_t *gb, uint8_t reg_idx) {
+uint16_t get_val_r16(dmg_gameboy_t *gb, reg_r16 reg_idx) {
     switch (reg_idx) {
         case REG_BC:
             return gb->bc;
@@ -87,7 +93,7 @@ uint16_t get_val_r16(dmg_gameboy_t *gb, uint8_t reg_idx) {
     }
 }
 
-void set_val_r16(dmg_gameboy_t *gb, uint8_t reg_idx, uint16_t val) {
+void set_val_r16(dmg_gameboy_t *gb, reg_r16 reg_idx, uint16_t val) {
     switch (reg_idx) {
         case REG_BC:
             gb->bc = val;
@@ -107,7 +113,7 @@ void set_val_r16(dmg_gameboy_t *gb, uint8_t reg_idx, uint16_t val) {
     }
 }
 
-uint16_t get_val_r16stk(dmg_gameboy_t *gb, uint8_t reg_idx) {
+uint16_t get_val_r16stk(dmg_gameboy_t *gb, reg_r16stk reg_idx) {
     switch (reg_idx) {
         case REG_STK_BC:
             return gb->bc;
@@ -123,7 +129,7 @@ uint16_t get_val_r16stk(dmg_gameboy_t *gb, uint8_t reg_idx) {
     }
 }
 
-void set_val_r16stk(dmg_gameboy_t *gb, uint8_t reg_idx, uint16_t val) {
+void set_val_r16stk(dmg_gameboy_t *gb, reg_r16stk reg_idx, uint16_t val) {
     switch (reg_idx) {
         case REG_STK_BC:
             gb->bc = val;
@@ -143,7 +149,7 @@ void set_val_r16stk(dmg_gameboy_t *gb, uint8_t reg_idx, uint16_t val) {
     }
 }
 
-uint8_t get_val_r16mem(dmg_gameboy_t *gb, uint8_t reg_idx) {
+uint8_t get_val_r16mem(dmg_gameboy_t *gb, reg_r16mem reg_idx) {
     uint8_t val = 0;
     switch (reg_idx) {
         case REG_MEM_BC:
@@ -167,7 +173,7 @@ uint8_t get_val_r16mem(dmg_gameboy_t *gb, uint8_t reg_idx) {
     return val;
 }
 
-void set_val_r16mem(dmg_gameboy_t *gb, uint8_t reg_idx, uint8_t val) {
+void set_val_r16mem(dmg_gameboy_t *gb, reg_r16mem reg_idx, uint8_t val) {
     switch (reg_idx) {
         case REG_MEM_BC:
             write_mem_8b(gb, gb->bc, val);
@@ -189,7 +195,7 @@ void set_val_r16mem(dmg_gameboy_t *gb, uint8_t reg_idx, uint8_t val) {
     }
 }
 
-bool check_condition(dmg_gameboy_t *gb, uint8_t cond_idx) {
+bool check_condition(dmg_gameboy_t *gb, condition cond_idx) {
     uint8_t flags = gb->f;
     switch (cond_idx) {
         case COND_NZ:
@@ -205,3 +211,136 @@ bool check_condition(dmg_gameboy_t *gb, uint8_t cond_idx) {
             return false;
     }
 }
+
+void set_flag(dmg_gameboy_t *gb, flags flag_ind) {
+    gb->f |= (0x80 >> flag_ind);
+}
+
+void clear_flag(dmg_gameboy_t *gb, flags flag_ind) {
+    uint8_t mask = ~(0x80 >> flag_ind);
+    gb->f &= mask;
+}
+
+void update_flag(dmg_gameboy_t *gb, flags flag_ind, bool condition) {
+    if (condition) {
+        set_flag(gb, flag_ind);
+    } else {
+        clear_flag(gb, flag_ind);
+    }
+}
+// Instruction functions
+// Block 0
+void handle_ld_r16_imm16(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
+    uint8_t dest = (opcode >> 4) & 0b11;
+    uint16_t val = read_imm16(gb);
+
+    set_val_r16(gb, dest, val);
+    gb->cycles += cycles[0];
+}
+
+void handle_ld_r16mem_a(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
+    uint8_t dest = (opcode >> 4) & 0b11;
+    set_val_r16mem(gb, dest, gb->a);
+    
+    gb->cycles += cycles[0];
+}
+
+void handle_ld_a_r16mem(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
+    uint8_t source = (opcode >> 4) & 0b11;
+    uint8_t val = get_val_r16mem(gb, source);
+
+    gb->cycles += cycles[0];
+}
+
+void handle_ld_imm16_sp(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
+    uint16_t addr = read_imm16(gb);
+    write_mem_16b(gb, addr, gb->sp);
+
+    gb->cycles += cycles[0];
+}
+
+void handle_inc_r16(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
+    uint8_t operand = (opcode >> 3) & 0b111;
+    uint16_t val = get_val_r16(gb, operand) + 1;
+    set_val_r16(gb, operand, val);
+
+    gb->cycles += cycles[0];
+}
+void handle_dec_r16(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
+    uint8_t operand = (opcode >> 3) & 0b111;
+    uint16_t val = get_val_r16(gb, operand) + 1;
+    set_val_r16(gb, operand, val);
+
+    gb->cycles += cycles[0];
+}
+void handle_add_hl_r16(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
+    uint16_t operand = (opcode >> 3) & 0b111;
+    uint16_t val = get_val_r16(gb, operand);
+
+    uint16_t result = val + gb->hl;
+
+    update_flag(gb, FLAG_HALF_CARRY, (((gb->hl & 0xFFF) + (val & 0xFFF)) > 0xFFF));
+    update_flag(gb, FLAG_CARRY, (result < gb->hl));
+    clear_flag(gb, FLAG_SUB);
+
+    gb->hl = result;
+    gb->cycles += cycles[0];
+}
+void handle_inc_r8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
+    uint8_t operand = (opcode >> 3) & 0b111;
+    uint8_t val = get_val_r8(gb, operand);
+    uint8_t result = val+1;
+
+    update_flag(gb, FLAG_HALF_CARRY, (((val&0xF)+1) > 0xF));
+    update_flag(gb, FLAG_CARRY, (val > result));
+    clear_flag(gb, FLAG_SUB);
+
+}
+void handle_dec_r8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_ld_r8_imm8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_flags_etc(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_jr_imm8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_jr_c_imm8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_stop(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+
+// Block 1
+void handle_ld_r8_r8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_halt(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+
+// Block 2 
+void handle_alu_add(dmg_gameboy_t *gb, uint8_t val);
+void handle_alu_adc(dmg_gameboy_t *gb, uint8_t val);
+void handle_alu_sub(dmg_gameboy_t *gb, uint8_t val);
+void handle_alu_sbc(dmg_gameboy_t *gb, uint8_t val);
+void handle_alu_and(dmg_gameboy_t *gb, uint8_t val);
+void handle_alu_xor(dmg_gameboy_t *gb, uint8_t val);
+void handle_alu_or(dmg_gameboy_t *gb, uint8_t val);
+void handle_alu_cp(dmg_gameboy_t *gb, uint8_t val);
+
+void handle_alu_r8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+
+// Block 3
+void handle_alu_imm8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_ret_c(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_ret(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_reti(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_jp_c_imm16(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_jp_imm16(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_jp_hl(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_call_c_imm16(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_call_imm16(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_rst(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_pop(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_push(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_prefix(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_ldh_c_a(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_ldh_imm8_a(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_ld_imm16_a(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_ldh_a_c(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_ldh_a_imm8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_ld_a_imm16(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_add_sp_imm8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_ld_hl_sp_imm8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_ld_sp_hl(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_di(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_ei(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);

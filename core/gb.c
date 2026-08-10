@@ -23,6 +23,7 @@ dmg_gameboy_t* init_gb(bool debug, const char* rom_path) {
     gb->halted = false;
     gb->halt_bug = false;
 
+    gb->cycles = 0;
     gb->intf = 0;
     gb->ie = 0;
     gb->ei_pending = 0;
