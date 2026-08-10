@@ -79,6 +79,25 @@ typedef enum {
     ALU_OR,
     ALU_CP
 } alu_operation;
+
+typedef enum {
+    PREFIX_RLC,
+    PREFIX_RRC,
+    PREFIX_RL,
+    PREFIX_RR,
+    PREFIX_SLA,
+    PREFIX_SRA,
+    PREFIX_SWAP,
+    PREFIX_SRL
+} prefix_operation;
+
+typedef enum {
+    PREFIX_MAIN,
+    PREFIX_BIT,
+    PREFIX_RES,
+    PREFIX_SET
+} prefix_block;
+
 // Helper functions
 uint8_t read_imm8(dmg_gameboy_t *gb);
 uint16_t read_imm16(dmg_gameboy_t *gb);
