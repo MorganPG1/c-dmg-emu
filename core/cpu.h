@@ -9,6 +9,59 @@
 #define CPU_H
 
 #include "gb.h"
+#include <stdint.h>
+#include <stdbool.h>
+
+typedef enum {
+    REG_B,
+    REG_C,
+    REG_D,
+    REG_E,
+    REG_H,
+    REG_L,
+    REG_MEM_HL,
+    REG_A
+} reg_r8;
+
+typedef enum {
+    REG_BC,
+    REG_DE,
+    REG_HL,
+    REG_SP
+} reg_r16;
+
+typedef enum {
+    REG_STK_BC,
+    REG_STK_DE,
+    REG_STK_HL,
+    REG_STK_AF
+} reg_r16stk;
+
+typedef enum {
+    REG_MEM_BC,
+    REG_MEM_DE,
+    REG_MEM_HLI,
+    REG_MEM_HLD
+} reg_r16mem;
+
+typedef enum {
+    COND_NZ,
+    COND_Z,
+    COND_NC,
+    COND_C
+} conditions;
+
+// Helper functions
+uint8_t get_val_r8(dmg_gameboy_t *gb, uint8_t reg_idx);
+void set_val_r8(dmg_gameboy_t *gb, uint8_t reg_idx, uint8_t val);
+uint16_t get_val_r16(dmg_gameboy_t *gb, uint8_t reg_idx);
+void set_val_r16(dmg_gameboy_t *gb, uint8_t reg_idx, uint16_t val);
+uint16_t get_val_r16stk(dmg_gameboy_t *gb, uint8_t reg_idx);
+void set_val_r16stk(dmg_gameboy_t *gb, uint8_t reg_idx, uint16_t val);
+uint8_t get_val_r16mem(dmg_gameboy_t *gb, uint8_t reg_idx);
+void set_val_r16mem(dmg_gameboy_t *gb, uint8_t reg_idx, uint8_t val);
+bool check_condition(dmg_gameboy_t *gb, uint8_t cond_idx);
+
 // Instruction functions
 // Block 0
 void handle_ld_r16_imm16(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
