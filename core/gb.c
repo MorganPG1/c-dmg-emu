@@ -43,3 +43,10 @@ void GB_log(const char *format, ...) {
     va_start(args, format);
     vprintf(format, args);
 }
+
+void GB_log_err(const char *format, ...) {
+    va_list args;
+
+    va_start(args, format);
+    vprintf(format, args);
+}
