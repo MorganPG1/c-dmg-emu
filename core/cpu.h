@@ -61,7 +61,7 @@ void handle_ldh_imm8_a(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
 void handle_ld_imm16_a(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
 void handle_ldh_a_c(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
 void handle_ldh_a_imm8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
-void handle_ldh_a_imm16(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_ld_a_imm16(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
 void handle_add_sp_imm8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
 void handle_ld_hl_sp_imm8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
 void handle_ld_sp_hl(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
