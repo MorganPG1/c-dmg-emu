@@ -260,15 +260,15 @@ void handle_ld_imm16_sp(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
 }
 
 void handle_inc_r16(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
-    uint8_t operand = (opcode >> 3) & 0b111;
+    uint8_t operand = (opcode >> 4) & 0b11;
     uint16_t val = get_val_r16(gb, operand) + 1;
     set_val_r16(gb, operand, val);
 
     gb->cycles += cycles[0];
 }
 void handle_dec_r16(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
-    uint8_t operand = (opcode >> 3) & 0b111;
-    uint16_t val = get_val_r16(gb, operand) + 1;
+    uint8_t operand = (opcode >> 4) & 0b11;
+    uint16_t val = get_val_r16(gb, operand) - 1;
     set_val_r16(gb, operand, val);
 
     gb->cycles += cycles[0];
@@ -292,16 +292,37 @@ void handle_inc_r8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
     uint8_t result = val+1;
 
     update_flag(gb, FLAG_HALF_CARRY, (((val&0xF)+1) > 0xF));
-    update_flag(gb, FLAG_CARRY, (val > result));
+    update_flag(gb, FLAG_ZERO, (result == 0));
     clear_flag(gb, FLAG_SUB);
 
+    set_val_r8(gb, operand, result);
+    gb->cycles += cycles[0];
 }
-void handle_dec_r8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
-void handle_ld_r8_imm8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_dec_r8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
+    uint8_t operand = (opcode >> 3) & 0b111;
+    uint8_t val = get_val_r8(gb, operand);
+    uint8_t result = val-1;
+
+    update_flag(gb, FLAG_HALF_CARRY, ((val & 0xF) == 0));
+    update_flag(gb, FLAG_ZERO, (result == 0));
+    set_flag(gb, FLAG_SUB);
+
+    set_val_r8(gb, operand, result);
+    gb->cycles += cycles[0];
+}
+void handle_ld_r8_imm8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
+    uint8_t dest = (opcode>>3) & 0b111;
+    uint8_t val = read_imm8(gb);
+
+    set_val_r8(gb, dest, val);
+    gb->cycles += cycles[0];
+}
 void handle_flags_etc(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
 void handle_jr_imm8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
 void handle_jr_c_imm8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
-void handle_stop(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_stop(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
+    GB_stop_err(gb, "STOP instruction (0x%02X) at PC %04X", opcode, gb->pc);
+}
 
 // Block 1
 void handle_ld_r8_r8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
