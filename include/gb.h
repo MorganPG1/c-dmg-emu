@@ -5,7 +5,6 @@
  * 
  * Header file for the main gameboy struct and functions
 */
-#include <cstdint>
 #include <stdint.h>
 
 typedef struct {
