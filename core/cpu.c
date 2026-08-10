@@ -630,8 +630,27 @@ void handle_prefix(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
     uint8_t val = get_val_r8(gb, operand);
     uint8_t result = 0;
     switch (blk) {
-        case PREFIX_MAIN:
-            break;
+        case PREFIX_MAIN: {
+            prefix_operation op = ind;
+            switch (op) {
+                case PREFIX_RLC:
+                    break;
+                case PREFIX_RRC:
+                    break;
+                case PREFIX_RL:
+                    break;
+                case PREFIX_RR:
+                    break;
+                case PREFIX_SLA:
+                    break;
+                case PREFIX_SRA:
+                    break;
+                case PREFIX_SWAP:
+                    break;
+                case PREFIX_SRL:
+                    break;
+            }
+        }
         case PREFIX_BIT: {
             uint8_t masked = val & (0b1 << ind);
             update_flag(gb, FLAG_ZERO, (masked == 0));
