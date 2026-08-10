@@ -52,6 +52,9 @@ typedef enum {
 } conditions;
 
 // Helper functions
+uint8_t read_imm8(dmg_gameboy_t *gb);
+uint16_t read_imm16(dmg_gameboy_t *gb);
+
 uint8_t get_val_r8(dmg_gameboy_t *gb, uint8_t reg_idx);
 void set_val_r8(dmg_gameboy_t *gb, uint8_t reg_idx, uint8_t val);
 uint16_t get_val_r16(dmg_gameboy_t *gb, uint8_t reg_idx);

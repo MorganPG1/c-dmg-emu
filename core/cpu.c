@@ -4,6 +4,17 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+uint8_t read_imm8(dmg_gameboy_t *gb) {
+    uint8_t val = read_mem_8b(gb, gb->pc);
+    gb->pc++;
+    return val;
+}
+
+uint16_t read_imm16(dmg_gameboy_t *gb) {
+    uint16_t val = read_mem_16b(gb, gb->pc);
+    gb->pc+=2;
+    return val;
+}
 uint8_t get_val_r8(dmg_gameboy_t *gb, uint8_t reg_idx) {
     switch (reg_idx) {
         case REG_B:
