@@ -6,8 +6,10 @@
  * Main gameboy initialisation function
 */
 #include "gb.h"
+#include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 dmg_gameboy_t* init_gb(bool debug, const char* rom_path) {
     dmg_gameboy_t* gb = malloc(sizeof(dmg_gameboy_t));
@@ -33,4 +35,11 @@ dmg_gameboy_t* init_gb(bool debug, const char* rom_path) {
     gb->pc = 0x0100;
 
     return gb;
+}
+
+void GB_log(const char *format, ...) {
+    va_list args;
+
+    va_start(args, format);
+    vprintf(format, args);
 }

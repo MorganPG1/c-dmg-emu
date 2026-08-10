@@ -8,7 +8,6 @@
 #ifndef MEM_H
 #define MEM_H
 
-#include <cstdint>
 #include <stdint.h>
 #include "gb.h"
 

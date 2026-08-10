@@ -59,5 +59,6 @@ typedef struct {
 } dmg_gameboy_t;
 
 dmg_gameboy_t* init_gb(bool debug, const char* rom_path);
+void GB_log(const char* format, ...);
 
 #endif

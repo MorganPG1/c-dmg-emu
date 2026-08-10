@@ -22,7 +22,6 @@ TEMPLATE = """\
 */
 
 #include <stdint.h>
-#include <stdio.h>
 #include "gb.h"
 #include "cpu.h"
 
@@ -71,7 +70,7 @@ for opcode, instr in data.items():
     if (opcode_int) == 0:
         pass
     elif is_illegal:
-        main_block += f'            printf("Invalid opcode %02X", opcode);\n'
+        main_block += f'            GB_log("Invalid opcode %02X", opcode);\n'
         main_block += f"            gb->running = false;\n"
     elif (opcode_int & 0b11001111) == 1:
         main_block += f"            handle_ld_r16_imm16(gb, opcode, cycles);\n"
