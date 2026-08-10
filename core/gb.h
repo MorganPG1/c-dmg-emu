@@ -1,7 +1,7 @@
 /*
  * C DMG Gameboy Emulator Project - MorganPG
  * 
- * include/gb.h
+ * core/gb.h
  * 
  * Header file for the main gameboy struct and functions
 */
