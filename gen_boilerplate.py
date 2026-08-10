@@ -70,11 +70,11 @@ for opcode, instr in data.items():
     if (opcode_int) == 0:
         pass
     elif (opcode_int & 0b11001111) == 1:
-        main_block += f"            handle_ld_r16_imm16(gb, opcode);\n"
+        main_block += f"            handle_ld_r16_imm16(gb, opcode, cycles);\n"
     elif (opcode_int & 0b11001111) == 2:
-        main_block += f"            handle_ld_r16mem_a(gb, opcode);\n"
+        main_block += f"            handle_ld_r16mem_a(gb, opcode, cycles);\n"
     elif (opcode_int & 0b11001111) == 10:
-        main_block += f"            handle_ld_a_r16mem(gb, opcode);\n"
+        main_block += f"            handle_ld_a_r16mem(gb, opcode, cycles);\n"
     main_block += f"            break;\n"
 
 outs = TEMPLATE.format(datetime_str=datetime_string, main_block=main_block)
