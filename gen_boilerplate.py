@@ -22,6 +22,7 @@ TEMPLATE = """\
 */
 
 #include <stdint.h>
+#include <stdio.h>
 #include "gb.h"
 #include "cpu.h"
 
@@ -69,12 +70,92 @@ for opcode, instr in data.items():
 
     if (opcode_int) == 0:
         pass
+    elif is_illegal:
+        main_block += f'            printf("Invalid opcode %02X", opcode);\n'
+        main_block += f"            gb->running = false;\n"
     elif (opcode_int & 0b11001111) == 1:
         main_block += f"            handle_ld_r16_imm16(gb, opcode, cycles);\n"
     elif (opcode_int & 0b11001111) == 2:
         main_block += f"            handle_ld_r16mem_a(gb, opcode, cycles);\n"
     elif (opcode_int & 0b11001111) == 10:
         main_block += f"            handle_ld_a_r16mem(gb, opcode, cycles);\n"
+    elif (opcode_int) == 8:
+        main_block += f"            handle_ld_imm16_sp(gb, opcode, cycles);\n"
+    elif (opcode_int & 0b11001111) == 3:
+        main_block += f"            handle_inc_r16(gb, opcode, cycles);\n"
+    elif (opcode_int & 0b11001111) == 11:
+        main_block += f"            handle_dec_r16(gb, opcode, cycles);\n"
+    elif (opcode_int & 0b11001111) == 9:
+        main_block += f"            handle_add_hl_r16(gb, opcode, cycles);\n"
+    elif (opcode_int & 0b11000111) == 6:
+        main_block += f"            handle_ld_r8_imm8(gb, opcode, cycles);\n"
+    elif (opcode_int & 0b11000111) == 7:
+        main_block += f"            handle_flags_etc(gb, opcode, cycles);\n"
+    elif (opcode_int) == 24:
+        main_block += f"            handle_jr_imm8(gb, opcode, cycles);\n"
+    elif (opcode_int & 0b11100111) == 32:
+        main_block += f"            handle_jr_c_imm8(gb, opcode, cycles);\n"
+    elif (opcode_int) == 16:
+        main_block += f"            handle_stop(gb, opcode, cycles);\n"
+    elif (opcode_int & 0b11000000) == 64:
+        if opcode_int == 0x76:
+            main_block += f"            handle_halt(gb, opcode, cycles);\n"
+        else:
+            main_block += f"            handle_ld_r8_r8(gb, opcode, cycles);\n"
+    elif (opcode_int & 0b11000000) == 128:
+        main_block += f"            handle_alu_r8(gb, opcode, cycles);\n"
+    elif (opcode_int & 0b11000111) == 198:
+        main_block += f"            handle_alu_imm8(gb, opcode, cycles);\n"
+    elif (opcode_int & 0b11100111) == 192:
+        main_block += f"            handle_ret_c(gb, opcode, cycles);\n"
+    elif (opcode_int) == 201:
+        main_block += f"            handle_ret(gb, opcode, cycles);\n"
+    elif (opcode_int) == 217:
+        main_block += f"            handle_reti(gb, opcode, cycles);\n"
+    elif (opcode_int & 0b11100111) == 194:
+        main_block += f"            handle_jp_c_imm16(gb, opcode, cycles);\n"
+    elif (opcode_int) == 195:
+        main_block += f"            handle_jp_imm16(gb, opcode, cycles);\n"
+    elif (opcode_int) == 233:
+        main_block += f"            handle_jp_hl(gb, opcode, cycles);\n"
+    elif (opcode_int & 0b11100111) == 196:
+        main_block += f"            handle_call_c_imm16(gb, opcode, cycles);\n"
+    elif (opcode_int) == 205:
+        main_block += f"            handle_call_imm16(gb, opcode, cycles);\n"
+    elif (opcode_int & 0b11000111) == 199:
+        main_block += f"            handle_rst(gb, opcode, cycles);\n"
+    elif (opcode_int & 0b11001111) == 193:
+        main_block += f"            handle_pop(gb, opcode, cycles);\n"
+    elif (opcode_int & 0b11001111) == 197:
+        main_block += f"            handle_push(gb, opcode, cycles);\n"
+    elif (opcode_int) == 0xCB:
+        main_block += f"            handle_prefix(gb, opcode, cycles);\n"
+    elif (opcode_int) == 0xE2:
+        main_block += f"            handle_ldh_c_a(gb, opcode, cycles);\n"
+    elif (opcode_int) == 0xE0:
+        main_block += f"            handle_ldh_imm8_a(gb, opcode, cycles);\n"
+    elif (opcode_int) == 0xEA:
+        main_block += f"            handle_ld_imm16_a(gb, opcode, cycles);\n"
+    elif (opcode_int) == 0xF2:
+        main_block += f"            handle_ldh_a_c(gb, opcode, cycles);\n"
+    elif (opcode_int) == 0xF0:
+        main_block += f"            handle_ldh_a_imm8(gb, opcode, cycles);\n"
+    elif (opcode_int) == 0xFA:
+        main_block += f"            handle_ld_a_imm16(gb, opcode, cycles);\n"
+    elif (opcode_int) == 0xE8:
+        main_block += f"            handle_add_sp_imm8(gb, opcode, cycles);\n"
+    elif (opcode_int) == 0xF8:
+        main_block += f"            handle_ld_hl_sp_imm8(gb, opcode, cycles);\n"
+    elif (opcode_int) == 0xF9:
+        main_block += f"            handle_ld_sp_hl(gb, opcode, cycles);\n"
+    elif (opcode_int) == 0xF3:
+        main_block += f"            handle_di(gb, opcode, cycles);\n"
+    elif (opcode_int) == 0xFB:
+        main_block += f"            handle_ei(gb, opcode, cycles);\n"
+            
+        
+    
+        
     main_block += f"            break;\n"
 
 outs = TEMPLATE.format(datetime_str=datetime_string, main_block=main_block)
