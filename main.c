@@ -4,7 +4,8 @@
 #include <stdlib.h>
 
 void mainloop(dmg_gameboy_t *gb) {
-    
+    GB_log("Dummy mainloop started\n");
+    GB_log("PC is at %04X\n", gb->pc);
 }
 
 int main( int argc, char** argv ) {

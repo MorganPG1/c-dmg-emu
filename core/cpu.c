@@ -622,7 +622,46 @@ void handle_push(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
     gb->cycles += cycles[0];
 }
 
-void handle_prefix(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+void handle_prefix(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
+    uint8_t prefix_opcode = read_imm8(gb);
+    prefix_block blk = (prefix_opcode >> 6) & 0b11;
+    reg_r8 operand = (prefix_opcode & 0b111);
+    uint8_t ind = (prefix_opcode >> 3) & 0b111;
+    uint8_t val = get_val_r8(gb, operand);
+    uint8_t result = 0;
+    switch (blk) {
+        case PREFIX_MAIN:
+            break;
+        case PREFIX_BIT: {
+            uint8_t masked = val & (0b1 << ind);
+            update_flag(gb, FLAG_ZERO, (masked == 0));
+            clear_flag(gb, FLAG_SUB);
+            set_flag(gb, FLAG_HALF_CARRY);
+            
+            gb->cycles += 8;
+            if (operand == REG_MEM_HL) {
+                gb->cycles += 4;
+            }
+
+            result = val;
+            break;
+        }
+        case PREFIX_RES:
+            result = val & ~(0b1 << ind);
+            gb->cycles += 8;
+            if (operand == REG_MEM_HL) {
+                gb->cycles += 8;
+            }
+            break;
+        case PREFIX_SET:
+            result = val | (0b1 << ind);
+            gb->cycles += 8;
+            if (operand == REG_MEM_HL) {
+                gb->cycles += 8;
+            }
+            break;
+    }
+}
 
 void handle_ldh_c_a(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
     uint16_t addr = 0xFF00 + gb->c;
