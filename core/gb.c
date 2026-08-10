@@ -50,3 +50,11 @@ void GB_log_err(const char *format, ...) {
     va_start(args, format);
     vprintf(format, args);
 }
+
+void GB_stop_err(dmg_gameboy_t *gb, const char *format, ...) {
+    va_list args;
+    
+    va_start(args, format);
+    vprintf(format, args);
+    gb->running = false;
+}
