@@ -11,6 +11,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 
 typedef struct {
     union {
@@ -47,6 +48,16 @@ typedef struct {
 
     uint16_t pc;
     uint16_t sp;
+    uint8_t ei_pending;
+    uint8_t intf;
+    uint8_t ie;
+
+    bool ime;
     bool running;
+    bool halted;
+    bool halt_bug;
 } dmg_gameboy_t;
+
+dmg_gameboy_t* init_gb(bool debug, const char* rom_path);
+
 #endif

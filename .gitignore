@@ -5,3 +5,6 @@
 *.sav
 log*.txt
 *.sym
+*.o
+./dmg_emu_py
+build/
