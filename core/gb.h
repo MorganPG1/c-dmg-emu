@@ -57,6 +57,7 @@ typedef struct {
     bool running;
     bool halted;
     bool halt_bug;
+    bool debug;
 } dmg_gameboy_t;
 
 dmg_gameboy_t* init_gb(bool debug, const char* rom_path);
