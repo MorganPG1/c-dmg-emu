@@ -56,8 +56,29 @@ typedef enum {
     FLAG_SUB,
     FLAG_HALF_CARRY,
     FLAG_CARRY
-} flags;
+} flag;
 
+typedef enum {
+    OPERATION_RLCA,
+    OPERATION_RRCA,
+    OPERATION_RLA,
+    OPERATION_RRA,
+    OPERATION_DAA,
+    OPERATION_CPL,
+    OPERATION_SCF,
+    OPERATION_CCF
+} flags_etc_operation;
+
+typedef enum {
+    ALU_ADD,
+    ALU_ADC,
+    ALU_SUB,
+    ALU_SBC,
+    ALU_AND,
+    ALU_XOR,
+    ALU_OR,
+    ALU_CP
+} alu_operation;
 // Helper functions
 uint8_t read_imm8(dmg_gameboy_t *gb);
 uint16_t read_imm16(dmg_gameboy_t *gb);
@@ -72,9 +93,9 @@ uint8_t get_val_r16mem(dmg_gameboy_t *gb, reg_r16mem reg_idx);
 void set_val_r16mem(dmg_gameboy_t *gb, reg_r16mem reg_idx, uint8_t val);
 bool check_condition(dmg_gameboy_t *gb, condition cond_idx);
 
-void set_flag(dmg_gameboy_t *gb, flags flag_ind);
-void clear_flag(dmg_gameboy_t *gb, flags flag_ind);
-void update_flag(dmg_gameboy_t *gb, flags flag_ind, bool condition);
+void set_flag(dmg_gameboy_t *gb, flag flag_ind);
+void clear_flag(dmg_gameboy_t *gb, flag flag_ind);
+void update_flag(dmg_gameboy_t *gb, flag flag_ind, bool condition);
 // Instruction functions
 // Block 0
 void handle_ld_r16_imm16(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
@@ -97,14 +118,13 @@ void handle_ld_r8_r8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
 void handle_halt(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
 
 // Block 2 
-void handle_alu_add(dmg_gameboy_t *gb, uint8_t val);
-void handle_alu_adc(dmg_gameboy_t *gb, uint8_t val);
-void handle_alu_sub(dmg_gameboy_t *gb, uint8_t val);
-void handle_alu_sbc(dmg_gameboy_t *gb, uint8_t val);
-void handle_alu_and(dmg_gameboy_t *gb, uint8_t val);
-void handle_alu_xor(dmg_gameboy_t *gb, uint8_t val);
-void handle_alu_or(dmg_gameboy_t *gb, uint8_t val);
-void handle_alu_cp(dmg_gameboy_t *gb, uint8_t val);
+uint16_t handle_alu_add(dmg_gameboy_t *gb, uint8_t val);
+uint8_t handle_alu_adc(dmg_gameboy_t *gb, uint8_t val);
+uint8_t handle_alu_sub(dmg_gameboy_t *gb, uint8_t val);
+uint8_t handle_alu_sbc(dmg_gameboy_t *gb, uint8_t val);
+uint8_t handle_alu_and(dmg_gameboy_t *gb, uint8_t val);
+uint8_t handle_alu_xor(dmg_gameboy_t *gb, uint8_t val);
+uint8_t handle_alu_or(dmg_gameboy_t *gb, uint8_t val);
 
 void handle_alu_r8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
 
