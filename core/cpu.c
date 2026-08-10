@@ -214,6 +214,10 @@ bool check_condition(dmg_gameboy_t *gb, condition cond_idx) {
     }
 }
 
+bool get_flag(dmg_gameboy_t *gb, flag flag_ind) {
+    return (((gb->f << flag_ind) & 0b1) == 1);
+}
+
 void set_flag(dmg_gameboy_t *gb, flag flag_ind) {
     gb->f |= (0x80 >> flag_ind);
 }
@@ -381,13 +385,79 @@ void handle_halt(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
 }
 
 // Block 2 
-uint16_t handle_alu_add(dmg_gameboy_t *gb, uint8_t val);
-uint8_t handle_alu_adc(dmg_gameboy_t *gb, uint8_t val);
-uint8_t handle_alu_sub(dmg_gameboy_t *gb, uint8_t val);
-uint8_t handle_alu_sbc(dmg_gameboy_t *gb, uint8_t val);
-uint8_t handle_alu_and(dmg_gameboy_t *gb, uint8_t val);
-uint8_t handle_alu_xor(dmg_gameboy_t *gb, uint8_t val);
-uint8_t handle_alu_or(dmg_gameboy_t *gb, uint8_t val);
+uint16_t handle_alu_add(dmg_gameboy_t *gb, uint8_t val) {
+    uint8_t result = gb->a + val;
+
+    update_flag(gb, FLAG_ZERO, (result == 0));
+    clear_flag(gb, FLAG_SUB);
+    update_flag(gb, FLAG_HALF_CARRY, (((gb->a & 0xF) + (val & 0xF)) > 0xF));
+    update_flag(gb, FLAG_CARRY, (result < gb->a));
+
+    return result;
+}
+uint8_t handle_alu_adc(dmg_gameboy_t *gb, uint8_t val) {
+    uint8_t carry = get_flag(gb, FLAG_CARRY);
+    uint16_t full_result = gb->a + val + carry;
+    uint8_t result = full_result & 0xFF;
+    update_flag(gb, FLAG_ZERO, (result == 0));
+    clear_flag(gb, FLAG_SUB);
+    update_flag(gb, FLAG_HALF_CARRY, (((gb->a & 0xF) + (val & 0xF) + carry) > 0xF));
+    update_flag(gb, FLAG_CARRY, (full_result > 0xFF));
+
+    return result;
+}
+uint8_t handle_alu_sub(dmg_gameboy_t *gb, uint8_t val) {
+    uint8_t result = gb->a - val;
+
+    update_flag(gb, FLAG_ZERO, (result == 0));
+    set_flag(gb, FLAG_SUB);
+    update_flag(gb, FLAG_HALF_CARRY, ((gb->a & 0x0F) < (val & 0x0F)));
+    update_flag(gb, FLAG_CARRY, (result > gb->a));
+
+    return result;
+}
+uint8_t handle_alu_sbc(dmg_gameboy_t *gb, uint8_t val) {
+    uint8_t carry = get_flag(gb, FLAG_CARRY);
+    uint16_t full_result = gb->a - (val + carry);
+    uint8_t result = full_result & 0xFF;
+
+    update_flag(gb, FLAG_ZERO, (result == 0));
+    set_flag(gb, FLAG_SUB);
+    update_flag(gb, FLAG_HALF_CARRY, ((gb->a & 0x0F) < ((val &0x0F) + carry)));
+    update_flag(gb, FLAG_CARRY, (full_result > 0xFFFF));
+
+    return result;
+}
+uint8_t handle_alu_and(dmg_gameboy_t *gb, uint8_t val) {
+    uint8_t result = gb->a & val;
+
+    update_flag(gb, FLAG_ZERO, (result == 0));
+    clear_flag(gb, FLAG_SUB);
+    set_flag(gb, FLAG_HALF_CARRY);
+    clear_flag(gb, FLAG_CARRY);
+
+    return result;
+}
+uint8_t handle_alu_xor(dmg_gameboy_t *gb, uint8_t val) {
+    uint8_t result = gb->a ^ val;
+
+    update_flag(gb, FLAG_ZERO, (result == 0));
+    clear_flag(gb, FLAG_SUB);
+    clear_flag(gb, FLAG_HALF_CARRY);
+    clear_flag(gb, FLAG_CARRY);
+
+    return result;
+}
+uint8_t handle_alu_or(dmg_gameboy_t *gb, uint8_t val) {
+    uint8_t result = gb->a | val;
+
+    update_flag(gb, FLAG_ZERO, (result == 0));
+    clear_flag(gb, FLAG_SUB);
+    clear_flag(gb, FLAG_HALF_CARRY);
+    clear_flag(gb, FLAG_CARRY);
+
+    return result;
+}
 
 void handle_alu_r8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
     reg_r8 operand = opcode & 0b111;

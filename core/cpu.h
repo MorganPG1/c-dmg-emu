@@ -93,6 +93,7 @@ uint8_t get_val_r16mem(dmg_gameboy_t *gb, reg_r16mem reg_idx);
 void set_val_r16mem(dmg_gameboy_t *gb, reg_r16mem reg_idx, uint8_t val);
 bool check_condition(dmg_gameboy_t *gb, condition cond_idx);
 
+bool get_flag(dmg_gameboy_t *gb, flag flag_ind);
 void set_flag(dmg_gameboy_t *gb, flag flag_ind);
 void clear_flag(dmg_gameboy_t *gb, flag flag_ind);
 void update_flag(dmg_gameboy_t *gb, flag flag_ind, bool condition);
