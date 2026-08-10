@@ -1,0 +1,7 @@
+.vscode/
+*.gb
+*prof
+*.gbc
+*.sav
+log*.txt
+*.sym
