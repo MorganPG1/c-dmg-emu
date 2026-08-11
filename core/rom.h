@@ -11,8 +11,13 @@
 #include "gb.h"
 #include <stdint.h>
 
+void read_rom_metadata(dmg_gameboy_t *gb);
+
 uint8_t read_mbc0(dmg_gameboy_t *gb, uint16_t addr);
 uint8_t read_mbc1(dmg_gameboy_t *gb, uint16_t addr);
+
+void write_mbc0(dmg_gameboy_t *gb, uint16_t addr, uint8_t val);
+void write_mbc1(dmg_gameboy_t *gb, uint16_t addr, uint8_t val);
 
 uint8_t read_rom(dmg_gameboy_t *gb, uint16_t addr);
 void write_rom(dmg_gameboy_t *gb, uint16_t addr, uint8_t val);

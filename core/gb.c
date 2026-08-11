@@ -36,6 +36,10 @@ dmg_gameboy_t* init_gb(bool debug, const char* rom_path) {
     gb->sp = 0xFFFE;
     gb->pc = 0x0100;
 
+    gb->rom_bank = 1;
+    gb->sram_bank = 0;
+    gb->sram_en = true;
+    
     if (!init_rom(gb, rom_path)) {
         fprintf(stderr, "Unable to read rom file: %s\n", rom_path);
         free(gb);

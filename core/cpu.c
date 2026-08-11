@@ -42,7 +42,7 @@ uint8_t get_val_r8(dmg_gameboy_t *gb, reg_r8 reg_idx) {
         case REG_A:
             return gb->a;
         default:
-            GB_stop_err(gb, "Unexpected register value passed to get_val_r8: %i", reg_idx);
+            GB_stop_err(gb, "Unexpected register value passed to get_val_r8: %i\n", reg_idx);
             return 0;
     }
 }
@@ -74,7 +74,7 @@ void set_val_r8(dmg_gameboy_t *gb, reg_r8 reg_idx, uint8_t val) {
             gb->a = val;
             break;
         default:
-            GB_stop_err(gb, "Unexpected register value passed to set_val_r8: %i", reg_idx);
+            GB_stop_err(gb, "Unexpected register value passed to set_val_r8: %i\n", reg_idx);
             break;
     }
 }
@@ -90,7 +90,7 @@ uint16_t get_val_r16(dmg_gameboy_t *gb, reg_r16 reg_idx) {
         case REG_SP:
             return gb->sp;
         default:
-            GB_stop_err(gb, "Unexpected register value passed to get_val_r16: %i", reg_idx);
+            GB_stop_err(gb, "Unexpected register value passed to get_val_r16: %i\n", reg_idx);
             return 0;
     }
 }
@@ -110,7 +110,7 @@ void set_val_r16(dmg_gameboy_t *gb, reg_r16 reg_idx, uint16_t val) {
             gb->sp = val;
             break;
         default:
-            GB_stop_err(gb, "Unexpected register value passed to set_val_r16: %i", reg_idx);
+            GB_stop_err(gb, "Unexpected register value passed to set_val_r16: %i\n", reg_idx);
             break;
     }
 }
@@ -126,7 +126,7 @@ uint16_t get_val_r16stk(dmg_gameboy_t *gb, reg_r16stk reg_idx) {
         case REG_STK_AF:
             return gb->af;
         default:
-            GB_stop_err(gb, "Unexpected register value passed to get_val_r16stk: %i", reg_idx);
+            GB_stop_err(gb, "Unexpected register value passed to get_val_r16stk: %i\n", reg_idx);
             return 0;
     }
 }
@@ -146,7 +146,7 @@ void set_val_r16stk(dmg_gameboy_t *gb, reg_r16stk reg_idx, uint16_t val) {
             gb->af = val;
             break;
         default:
-            GB_stop_err(gb, "Unexpected register value passed to set_val_r16stk: %i", reg_idx);
+            GB_stop_err(gb, "Unexpected register value passed to set_val_r16stk: %i\n", reg_idx);
             break;
     }
 }
@@ -169,7 +169,7 @@ uint8_t get_val_r16mem(dmg_gameboy_t *gb, reg_r16mem reg_idx) {
             gb->hl--;
             break;
         default:
-            GB_stop_err(gb, "Unexpected register value passed to get_val_r16mem: %i", reg_idx);
+            GB_stop_err(gb, "Unexpected register value passed to get_val_r16mem: %i\n", reg_idx);
             break;
     }
     return val;
@@ -192,7 +192,7 @@ void set_val_r16mem(dmg_gameboy_t *gb, reg_r16mem reg_idx, uint8_t val) {
             gb->hl--;
             break;
         default:
-            GB_stop_err(gb, "Unexpected register value passed to set_val_r16mem: %i", reg_idx);
+            GB_stop_err(gb, "Unexpected register value passed to set_val_r16mem: %i\n", reg_idx);
             break;
     }
 }
@@ -209,7 +209,7 @@ bool check_condition(dmg_gameboy_t *gb, condition cond_idx) {
         case COND_C:
             return (((flags > 4) & 0b1) == 0);
         default:
-            GB_stop_err(gb, "Unexpected condition value passed to check_condition: %i", cond_idx);
+            GB_stop_err(gb, "Unexpected condition value passed to check_condition: %i\n", cond_idx);
             return false;
     }
 }
@@ -425,7 +425,7 @@ void handle_jr_c_imm8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
     }
 }
 void handle_stop(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
-    GB_stop_err(gb, "STOP instruction (0x%02X) at PC %04X", opcode, gb->pc);
+    GB_stop_err(gb, "STOP instruction (0x%02X) at PC %04X\n", opcode, gb->pc);
 }
 
 // Block 1
