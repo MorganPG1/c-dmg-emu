@@ -416,9 +416,8 @@ void handle_jr_imm8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
 }
 void handle_jr_c_imm8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
     uint8_t condition = (opcode >> 3) & 0b11;
-    
+    int8_t val = read_imm8(gb);
     if (check_condition(gb, condition)) {
-        int8_t val = read_imm8(gb);
         gb->pc += val;
         gb->cycles += cycles[0];
     } else {
@@ -617,8 +616,8 @@ void handle_reti(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
 }
 void handle_jp_c_imm16(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
     condition cond = (opcode >> 3) & 0b11;
+    uint16_t addr = read_imm16(gb);
     if (check_condition(gb, cond)) {
-        uint16_t addr = read_imm16(gb);
         gb->pc = addr;
         gb->cycles += cycles[0];
     } else {
@@ -638,8 +637,8 @@ void handle_jp_hl(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
 
 void handle_call_c_imm16(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
     condition cond = (opcode >> 3) & 0b11;
+    uint16_t addr = read_imm16(gb);
     if (check_condition(gb, cond)) {
-        uint16_t addr = read_imm16(gb);
         write_mem_16b(gb, gb->sp-2, gb->pc);
         
         gb->sp -= 2;
