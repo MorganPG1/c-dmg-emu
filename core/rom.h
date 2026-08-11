@@ -19,6 +19,6 @@ void write_rom(dmg_gameboy_t *gb, uint16_t addr, uint8_t val);
 bool init_rom(dmg_gameboy_t *gb, const char* rom_path);
 
 uint8_t read_sram(dmg_gameboy_t *gb, uint16_t addr);
-void write_sram(dmg_gameboy_t *gb, uint16_t addr);
+void write_sram(dmg_gameboy_t *gb, uint16_t addr, uint8_t val);
 
 #endif

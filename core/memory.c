@@ -1,5 +1,6 @@
 #include "memory.h"
 #include "gb.h"
+#include "rom.h"
 #include <linux/limits.h>
 #include <stdint.h>
 
@@ -53,24 +54,33 @@ uint16_t get_memory_offset(dmg_gameboy_t *gb, uint16_t addr, memory_region regio
 }
 
 void write_mem_8b(dmg_gameboy_t *gb, uint16_t addr, uint8_t val) {
-    switch (get_memory_region(gb, addr)) {
+    memory_region region = get_memory_region(gb, addr);
+    uint16_t offset = get_memory_offset(gb, addr, region);
+    switch (region) {
         case REGION_ROM:
+            write_rom(gb, offset, val);
             break;
         case REGION_VRAM:
+            gb->vram[offset] = val;
             break;
         case REGION_SRAM:
+            write_sram(gb, offset, val);
             break;
         case REGION_WRAM:
+            gb->wram[offset] = val;
             break;
         case REGION_ECHO_WRAM:
+            gb->wram[offset] = val;
             break;
         case REGION_OAM:
+            gb->oam[offset] = val;
             break;
         case REGION_UNUSABLE:
             break;
         case REGION_IO:
             break;
         case REGION_HRAM:
+            gb->hram[offset] = val;
             break;
         case REGION_IE:
             gb->ie=val;
@@ -86,25 +96,34 @@ void write_mem_16b(dmg_gameboy_t *gb, uint16_t addr, uint16_t val) {
 }
 
 uint8_t read_mem_8b(dmg_gameboy_t *gb, uint16_t addr) {
+    memory_region region = get_memory_region(gb, addr);
+    uint16_t offset = get_memory_offset(gb, addr, region);
     uint8_t result = 0;
-    switch (get_memory_region(gb, addr)) {
+    switch (region) {
         case REGION_ROM:
+            result = read_rom(gb, offset);
             break;
         case REGION_VRAM:
+            result = gb->vram[offset];
             break;
         case REGION_SRAM:
+            result = read_sram(gb, addr);
             break;
         case REGION_WRAM:
+            result = gb->wram[offset];
             break;
         case REGION_ECHO_WRAM:
+            result = gb->wram[offset];
             break;
         case REGION_OAM:
+            result = gb->oam[offset];
             break;
         case REGION_UNUSABLE:
             break;
         case REGION_IO:
             break;
         case REGION_HRAM:
+            result = gb->hram[offset];
             break;
         case REGION_IE:
             result = gb->ie;
