@@ -19,7 +19,7 @@ uint8_t read_imm8(dmg_gameboy_t *gb) {
 uint16_t read_imm16(dmg_gameboy_t *gb) {
     uint8_t low = read_imm8(gb);
     uint8_t high = read_imm8(gb);
-    uint16_t val = low | (high << 7);
+    uint16_t val = low | (high << 8);
     return val;
 }
 
@@ -431,7 +431,7 @@ void handle_stop(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
 // Block 1
 void handle_ld_r8_r8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
     reg_r8 source = opcode & 0b111;
-    reg_r8 dest = opcode & 0b111;
+    reg_r8 dest = (opcode >> 3) & 0b111;
 
     uint8_t val = get_val_r8(gb, source);
     set_val_r8(gb, dest, val);

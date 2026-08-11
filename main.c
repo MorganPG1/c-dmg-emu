@@ -7,6 +7,7 @@
 #include <time.h>
 #include <signal.h>
 #include "core/boilerplate.h"
+#include "memory.h"
 
 #define CYCLES_PER_FRAME 70224
 #define TARGET_FRAME_TIME_NS 16742706
@@ -39,15 +40,23 @@ void mainloop(dmg_gameboy_t *gb) {
     while (gb->running) {
         uint32_t t_cycles = 0;
         while (t_cycles < CYCLES_PER_FRAME) {
+            if (gb->debug) {
+                uint16_t pc = gb->pc;
+                GB_log("A:%02X F:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X IME:%i\n", gb->a, gb->f, gb->b, gb->c, gb->d, gb->e, gb->h, gb->l, gb->sp, pc, read_mem_8b(gb, pc), read_mem_8b(gb, pc+1), read_mem_8b(gb, pc+2),read_mem_8b(gb, pc+3), gb->ime);
+            }
             gb->cycles = 0;
             if (!gb->halted) {
                 uint8_t opcode = read_imm8(gb);
                 gb->cycles += 4;
                 execute_instr(gb, opcode);
+                if (gb->ei_pending != 0) gb->ei_pending--;
             } else {
                 gb->cycles += 4;
             }
             t_cycles += gb->cycles;
+
+            
+            
         }
 
         uint64_t f_end = get_time_ns();
