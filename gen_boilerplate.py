@@ -86,6 +86,10 @@ for opcode, instr in data.items():
         main_block += f"            handle_dec_r16(gb, opcode, cycles);\n"
     elif (opcode_int & 0b11001111) == 9:
         main_block += f"            handle_add_hl_r16(gb, opcode, cycles);\n"
+    elif (opcode_int & 0b11000111) == 4:
+        main_block += f"            handle_inc_r8(gb, opcode, cycles);\n"
+    elif (opcode_int & 0b11000111) == 5:
+        main_block += f"            handle_dec_r8(gb, opcode, cycles);\n"
     elif (opcode_int & 0b11000111) == 6:
         main_block += f"            handle_ld_r8_imm8(gb, opcode, cycles);\n"
     elif (opcode_int & 0b11000111) == 7:
