@@ -875,7 +875,7 @@ void handle_add_sp_imm8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
     clear_flag(gb, FLAG_ZERO);
     clear_flag(gb, FLAG_SUB);
     update_flag(gb, FLAG_HALF_CARRY, (((val & 0xF) + (gb->sp & 0xF)) > 0xF));
-    update_flag(gb, FLAG_CARRY, (result < gb->sp));
+    update_flag(gb, FLAG_CARRY, (((gb->sp & 0xFF) + (val & 0xFF)) > 0xFF));
 
     gb->sp = result;
     gb->cycles += cycles[0];
@@ -888,9 +888,8 @@ void handle_ld_hl_sp_imm8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) 
     clear_flag(gb, FLAG_ZERO);
     clear_flag(gb, FLAG_SUB);
     update_flag(gb, FLAG_HALF_CARRY, (((val & 0xF) + (gb->sp & 0xF)) > 0xF));
-    update_flag(gb, FLAG_CARRY, (result < gb->sp));
+    update_flag(gb, FLAG_CARRY, (((gb->sp & 0xFF) + (val & 0xFF)) > 0xFF));
 
-    gb->sp = result;
     gb->hl = result;
     gb->cycles += cycles[0];
 }
