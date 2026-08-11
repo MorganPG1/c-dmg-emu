@@ -215,7 +215,7 @@ bool check_condition(dmg_gameboy_t *gb, condition cond_idx) {
 }
 
 bool get_flag(dmg_gameboy_t *gb, flag flag_ind) {
-    return (((gb->f << flag_ind) & 0b1) == 1);
+    return (((gb->f >> (7-flag_ind)) & 0b1) == 1);
 }
 
 void set_flag(dmg_gameboy_t *gb, flag flag_ind) {
