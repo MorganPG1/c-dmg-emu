@@ -13,7 +13,6 @@
 
 dmg_gameboy_t* init_gb(bool debug, const char* rom_path) {
     dmg_gameboy_t* gb = malloc(sizeof(dmg_gameboy_t));
-
     if (gb == NULL) {
         return NULL;
     }
