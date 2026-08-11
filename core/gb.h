@@ -81,7 +81,8 @@ typedef struct {
     mbc mbc;
     uint8_t rom_bank;
     uint8_t sram_bank;
-
+    long rom_size;
+    
     bool sram_en;
     bool ime;
     bool running;

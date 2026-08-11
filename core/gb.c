@@ -6,6 +6,7 @@
  * Main gameboy initialisation function
 */
 #include "gb.h"
+#include "rom.h"
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -34,6 +35,12 @@ dmg_gameboy_t* init_gb(bool debug, const char* rom_path) {
     gb->hl = 0x014D;
     gb->sp = 0xFFFE;
     gb->pc = 0x0100;
+
+    if (!init_rom(gb, rom_path)) {
+        fprintf(stderr, "Unable to read rom file: %s\n", rom_path);
+        free(gb);
+        exit(1);
+    }
 
     return gb;
 }
