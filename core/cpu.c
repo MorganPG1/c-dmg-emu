@@ -326,23 +326,64 @@ void handle_ld_r8_imm8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
 void handle_flags_etc(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
     flags_etc_operation operation = (opcode >> 3) & 0b111;
     switch (operation) {
-        case OPERATION_RLCA:
+        case OPERATION_RLCA: {
+            uint8_t result = (gb->a << 1) | (gb ->a >> 7);
+            clear_flag(gb, FLAG_ZERO);
+            clear_flag(gb, FLAG_SUB);
+            clear_flag(gb, FLAG_HALF_CARRY);
+            update_flag(gb, FLAG_CARRY, ((gb->a & 0x80) != 0));
+            
+            gb->a = result;
             break;
-        case OPERATION_RRCA:
+        }
+        case OPERATION_RRCA: {
+            uint8_t result = (gb->a >> 1) | (gb ->a << 7);
+            clear_flag(gb, FLAG_ZERO);
+            clear_flag(gb, FLAG_SUB);
+            clear_flag(gb, FLAG_HALF_CARRY);
+            update_flag(gb, FLAG_CARRY, ((gb->a & 0x01) != 0));
+            
+            gb->a = result;
             break;
-        case OPERATION_RLA:
+        }
+        case OPERATION_RLA: {
+            uint8_t result = (gb->a << 1) | (get_flag(gb, FLAG_CARRY));
+            clear_flag(gb, FLAG_ZERO);
+            clear_flag(gb, FLAG_SUB);
+            clear_flag(gb, FLAG_HALF_CARRY);
+            update_flag(gb, FLAG_CARRY, ((gb->a & 0x80) != 0));
+            
+            gb->a = result;
             break;
-        case OPERATION_RRA:
+        }
+        case OPERATION_RRA: {
+            uint8_t result = (gb->a >> 1) | (get_flag(gb, FLAG_CARRY) << 7);
+            clear_flag(gb, FLAG_ZERO);
+            clear_flag(gb, FLAG_SUB);
+            clear_flag(gb, FLAG_HALF_CARRY);
+            update_flag(gb, FLAG_CARRY, ((gb->a & 0x01) != 0));
+            
+            gb->a = result;
             break;
+        }
         case OPERATION_DAA:
             break;
         case OPERATION_CPL:
+            gb->a = ~gb->a;
+            set_flag(gb, FLAG_SUB);
+            set_flag(gb, FLAG_HALF_CARRY);
             break;
         case OPERATION_SCF:
+            clear_flag(gb, FLAG_SUB);
+            clear_flag(gb, FLAG_HALF_CARRY);
+            set_flag(gb, FLAG_CARRY);
             break;
         case OPERATION_CCF:
+            update_flag(gb, FLAG_CARRY, (!get_flag(gb,FLAG_CARRY)));
             break;
     }
+
+    gb->cycles += cycles[0];
 }
 void handle_jr_imm8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
     int8_t val = read_imm8(gb);
