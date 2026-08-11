@@ -254,7 +254,8 @@ void handle_ld_r16mem_a(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
 void handle_ld_a_r16mem(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
     uint8_t source = (opcode >> 4) & 0b11;
     uint8_t val = get_val_r16mem(gb, source);
-
+    
+    gb->a = val;
     gb->cycles += cycles[0];
 }
 
