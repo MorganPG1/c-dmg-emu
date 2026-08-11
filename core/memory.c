@@ -121,6 +121,9 @@ uint8_t read_mem_8b(dmg_gameboy_t *gb, uint16_t addr) {
         case REGION_UNUSABLE:
             break;
         case REGION_IO:
+            if (addr == 0xFF44) {
+                return 0x90;
+            }
             break;
         case REGION_HRAM:
             result = gb->hram[offset];
