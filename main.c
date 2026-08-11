@@ -84,6 +84,7 @@ int main( int argc, char** argv ) {
     signal(SIGINT, handle_sigint);
 
     mainloop(gb);
+    GB_log("Exiting, gb->running was set to false\n");
     clean_exit(gb);
 }
 

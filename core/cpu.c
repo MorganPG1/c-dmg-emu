@@ -201,13 +201,13 @@ bool check_condition(dmg_gameboy_t *gb, condition cond_idx) {
     uint8_t flags = gb->f;
     switch (cond_idx) {
         case COND_NZ:
-            return (((flags > 7) & 0b1) != 0);
+            return (((flags >> 7) & 0b1) == 0);
         case COND_Z:
-            return (((flags > 7) & 0b1) == 0);
+            return (((flags >> 7) & 0b1) == 1);
         case COND_NC:
-            return (((flags > 4) & 0b1) != 0);
+            return (((flags >> 4) & 0b1) == 0);
         case COND_C:
-            return (((flags > 4) & 0b1) == 0);
+            return (((flags >> 4) & 0b1) == 1);
         default:
             GB_stop_err(gb, "Unexpected condition value passed to check_condition: %i\n", cond_idx);
             return false;

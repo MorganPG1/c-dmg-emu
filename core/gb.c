@@ -64,6 +64,7 @@ void GB_log_err(const char *format, ...) {
 }
 
 void GB_stop_err(dmg_gameboy_t *gb, const char *format, ...) {
+    printf("GB_stop_err was called, the following exception has occured:\n");
     va_list args;
     
     va_start(args, format);
