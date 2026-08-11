@@ -1,5 +1,6 @@
 #include "memory.h"
 #include "gb.h"
+#include <linux/limits.h>
 #include <stdint.h>
 
 memory_region get_memory_region(dmg_gameboy_t *gb, uint16_t addr) {
@@ -23,6 +24,31 @@ memory_region get_memory_region(dmg_gameboy_t *gb, uint16_t addr) {
         return REGION_HRAM;
     } else {
         return REGION_IE;
+    }
+}
+
+uint16_t get_memory_offset(dmg_gameboy_t *gb, uint16_t addr, memory_region region) {
+    switch (region) {
+        case REGION_ROM:
+            return addr;
+        case REGION_VRAM:
+            return addr-0x8000;
+        case REGION_SRAM:
+            return addr-0xA000;
+        case REGION_WRAM:
+            return addr-0xC000;
+        case REGION_ECHO_WRAM:
+            return addr-0xE000;
+        case REGION_OAM:
+            return addr-0xFE00;
+        case REGION_UNUSABLE:
+            return addr-0xFEA0;
+        case REGION_IO:
+            return addr-0xFF00;
+        case REGION_HRAM:
+            return addr-0xFF80;
+        case REGION_IE:
+            return addr-0xFFFF;
     }
 }
 

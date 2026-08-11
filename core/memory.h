@@ -25,6 +25,7 @@ typedef enum {
 } memory_region;
 
 memory_region get_memory_region(dmg_gameboy_t *gb, uint16_t addr);
+uint16_t get_memory_offset(dmg_gameboy_t *gb, uint16_t addr, memory_region region);
 
 uint8_t read_mem_8b(dmg_gameboy_t *gb, uint16_t addr);
 uint16_t read_mem_16b(dmg_gameboy_t *gb, uint16_t addr);
