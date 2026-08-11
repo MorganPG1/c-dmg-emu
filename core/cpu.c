@@ -281,7 +281,7 @@ void handle_dec_r16(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
     gb->cycles += cycles[0];
 }
 void handle_add_hl_r16(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
-    uint16_t operand = (opcode >> 3) & 0b111;
+    uint16_t operand = (opcode >> 4) & 0b11;
     uint16_t val = get_val_r16(gb, operand);
 
     uint16_t result = val + gb->hl;
