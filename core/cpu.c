@@ -634,22 +634,100 @@ void handle_prefix(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
             prefix_operation op = ind;
             switch (op) {
                 case PREFIX_RLC:
+                    result = (val << 1) | (val >> 7);
+                    update_flag(gb, FLAG_ZERO, (result == 0));
+                    clear_flag(gb, FLAG_SUB);
+                    clear_flag(gb, FLAG_HALF_CARRY);
+                    update_flag(gb, FLAG_CARRY, ((val & 0x80) != 0));
+                    gb->cycles += 8;
+                    if (operand == REG_MEM_HL) {
+                        gb->cycles += 8;
+                    }
+
                     break;
                 case PREFIX_RRC:
+                    result = (val >> 1) | (val << 7);
+                    update_flag(gb, FLAG_ZERO, (result == 0));
+                    clear_flag(gb, FLAG_SUB);
+                    clear_flag(gb, FLAG_HALF_CARRY);
+                    update_flag(gb, FLAG_CARRY, ((val & 0x01) != 0));
+                    gb->cycles += 8;
+                    if (operand == REG_MEM_HL) {
+                        gb->cycles += 8;
+                    }
+
                     break;
                 case PREFIX_RL:
+                    result = (val << 1) | (get_flag(gb, FLAG_CARRY));
+                    update_flag(gb, FLAG_ZERO, (result == 0));
+                    clear_flag(gb, FLAG_SUB);
+                    clear_flag(gb, FLAG_HALF_CARRY);
+                    update_flag(gb, FLAG_CARRY, ((val & 0x80) != 0));
+                    gb->cycles += 8;
+                    if (operand == REG_MEM_HL) {
+                        gb->cycles += 8;
+                    }
+                    
                     break;
                 case PREFIX_RR:
+                    result = (val >> 1) | (get_flag(gb, FLAG_CARRY) << 7);
+                    update_flag(gb, FLAG_ZERO, (result == 0));
+                    clear_flag(gb, FLAG_SUB);
+                    clear_flag(gb, FLAG_HALF_CARRY);
+                    update_flag(gb, FLAG_CARRY, ((val & 0x01) != 0));
+                    gb->cycles += 8;
+                    if (operand == REG_MEM_HL) {
+                        gb->cycles += 8;
+                    }
+
                     break;
                 case PREFIX_SLA:
+                    result = (val << 1);
+                    update_flag(gb, FLAG_ZERO, (result == 0));
+                    clear_flag(gb, FLAG_SUB);
+                    clear_flag(gb, FLAG_HALF_CARRY);
+                    update_flag(gb, FLAG_CARRY, ((val & 0x80) != 0));
+                    gb->cycles += 8;
+                    if (operand == REG_MEM_HL) {
+                        gb->cycles += 8;
+                    }
+
                     break;
                 case PREFIX_SRA:
+                    result = (val >> 1) | (val & 0x80);
+                    update_flag(gb, FLAG_ZERO, (result == 0));
+                    clear_flag(gb, FLAG_SUB);
+                    clear_flag(gb, FLAG_HALF_CARRY);
+                    update_flag(gb, FLAG_CARRY, ((val & 0x01) != 0));
+                    gb->cycles += 8;
+                    if (operand == REG_MEM_HL) {
+                        gb->cycles += 8;
+                    }
                     break;
                 case PREFIX_SWAP:
+                    result = ((val >> 4) & 0xF) | ((val << 4) & 0xF0);
+                    update_flag(gb, FLAG_ZERO, (result == 0));
+                    clear_flag(gb, FLAG_SUB);
+                    clear_flag(gb, FLAG_HALF_CARRY);
+                    clear_flag(gb, FLAG_CARRY);
+                    gb->cycles += 8;
+                    if (operand == REG_MEM_HL) {
+                        gb->cycles += 8;
+                    }
                     break;
                 case PREFIX_SRL:
+                    result = (val >> 1);
+                    update_flag(gb, FLAG_ZERO, (result == 0));
+                    clear_flag(gb, FLAG_SUB);
+                    clear_flag(gb, FLAG_HALF_CARRY);
+                    update_flag(gb, FLAG_CARRY, ((val & 0x01) != 0));
+                    gb->cycles += 8;
+                    if (operand == REG_MEM_HL) {
+                        gb->cycles += 8;
+                    }
                     break;
             }
+            break;
         }
         case PREFIX_BIT: {
             uint8_t masked = val & (0b1 << ind);
@@ -680,6 +758,7 @@ void handle_prefix(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
             }
             break;
     }
+    set_val_r8(gb, operand, result);
 }
 
 void handle_ldh_c_a(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
