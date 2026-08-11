@@ -8,3 +8,4 @@ log*.txt
 *.o
 ./dmg_emu_py
 build/
+.cache/
