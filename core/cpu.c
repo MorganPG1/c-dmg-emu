@@ -143,7 +143,7 @@ void set_val_r16stk(dmg_gameboy_t *gb, reg_r16stk reg_idx, uint16_t val) {
             gb->hl = val;
             break;
         case REG_STK_AF:
-            gb->af = val;
+            gb->af = val & 0xFFF0;
             break;
         default:
             GB_stop_err(gb, "Unexpected register value passed to set_val_r16stk: %i\n", reg_idx);
