@@ -366,8 +366,30 @@ void handle_flags_etc(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
             gb->a = result;
             break;
         }
-        case OPERATION_DAA:
+        case OPERATION_DAA: {
+            bool flag_n = get_flag(gb, FLAG_SUB);
+            bool flag_hc = get_flag(gb, FLAG_HALF_CARRY);
+            bool flag_c = get_flag(gb, FLAG_CARRY);
+            uint8_t adj = 0;
+            uint8_t result = gb->a;
+            if (flag_n) {
+                if (flag_hc) adj += 0x6;
+                if (flag_c) adj += 0x60;
+                result -= adj;
+            } else {
+                if ((flag_hc) || ((gb->a & 0xF) > 0x9)) adj += 0x6;
+                if ((flag_c) || (gb->a > 0x99)) {
+                    adj += 0x60;
+                    set_flag(gb, FLAG_CARRY);
+                }
+                result += adj;
+            }
+            update_flag(gb, FLAG_ZERO, (result == 0));
+            clear_flag(gb, FLAG_HALF_CARRY);
+
+            gb->a = result;
             break;
+        }
         case OPERATION_CPL:
             gb->a = ~gb->a;
             set_flag(gb, FLAG_SUB);
