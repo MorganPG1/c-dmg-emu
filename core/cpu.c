@@ -907,3 +907,36 @@ void handle_di(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
 void handle_ei(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
     gb->ei_pending = 2;
 }
+
+void fire_interrupt(dmg_gameboy_t *gb, uint8_t interrupt) {
+    gb->intf |= (1 << interrupt);
+}
+void clear_interrupt(dmg_gameboy_t *gb, uint8_t interrupt) {
+    gb->intf &= ~(1 << interrupt);
+}
+
+void check_interrupt(dmg_gameboy_t *gb) {
+    uint8_t ints = gb->ie & gb->intf;
+    uint8_t i;
+    for (i=0; i<5; i++) {
+        if ((ints & (1 << i)) != 0) {
+            if (gb->halted) {
+                gb->halted = false;
+                gb->cycles += 4;
+            }
+
+            if (gb->ime) {
+                clear_interrupt(gb, i);
+                uint16_t handler = 0x40 + (0x8 * i);
+
+                write_mem_16b(gb, gb->sp-2, gb->pc);
+                gb->sp -= 2;
+                gb->pc = handler;
+
+                gb->ime = 0;
+                gb->cycles += 20;
+            }
+        } 
+    }
+}
+

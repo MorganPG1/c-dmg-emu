@@ -173,4 +173,8 @@ void handle_ld_hl_sp_imm8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
 void handle_ld_sp_hl(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
 void handle_di(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
 void handle_ei(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
+
+void fire_interrupt(dmg_gameboy_t *gb, uint8_t interrupt);
+void clear_interrupt(dmg_gameboy_t *gb, uint8_t interrupt);
+void check_interrupt(dmg_gameboy_t *gb);
 #endif

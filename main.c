@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <time.h>
 #include <signal.h>
+#include "core/io.h"
 #include "core/boilerplate.h"
 #include "core/memory.h"
 
@@ -35,6 +36,16 @@ void handle_exitsig(int sig) {
     exit(0);
 }
 
+void step(dmg_gameboy_t *gb) {
+    check_interrupt(gb);
+    
+    uint8_t opcode = read_imm8(gb);
+    gb->cycles += 4;
+    step_io(gb, gb->cycles);
+    execute_instr(gb, opcode);
+    step_io(gb, gb->cycles);
+    if (gb->ei_pending != 0) gb->ei_pending--;
+}
 void mainloop(dmg_gameboy_t *gb) {
     uint64_t f_start = get_time_ns();
     while (gb->running) {
@@ -46,10 +57,7 @@ void mainloop(dmg_gameboy_t *gb) {
             }
             gb->cycles = 0;
             if (!gb->halted) {
-                uint8_t opcode = read_imm8(gb);
-                gb->cycles += 4;
-                execute_instr(gb, opcode);
-                if (gb->ei_pending != 0) gb->ei_pending--;
+                step(gb);
             } else {
                 gb->cycles += 4;
             }
