@@ -402,6 +402,8 @@ void handle_flags_etc(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
             set_flag(gb, FLAG_CARRY);
             break;
         case OPERATION_CCF:
+            clear_flag(gb, FLAG_SUB);
+            clear_flag(gb, FLAG_HALF_CARRY);
             update_flag(gb, FLAG_CARRY, (!get_flag(gb,FLAG_CARRY)));
             break;
     }
@@ -441,7 +443,7 @@ void handle_ld_r8_r8(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
 
 void handle_halt(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
     gb->halted = true;
-    if (!gb->ime && gb->ei_pending){
+    if (!gb->ime && (gb->ei_pending == 0) && ((gb->ie & gb->intf) & 0x1f) != 0){
         gb->halt_bug = true;
     }
     gb->cycles += cycles[0];
@@ -487,7 +489,7 @@ uint8_t handle_alu_sbc(dmg_gameboy_t *gb, uint8_t val) {
     update_flag(gb, FLAG_ZERO, (result == 0));
     set_flag(gb, FLAG_SUB);
     update_flag(gb, FLAG_HALF_CARRY, ((gb->a & 0x0F) < ((val &0x0F) + carry)));
-    update_flag(gb, FLAG_CARRY, (full_result > 0xFFFF));
+    update_flag(gb, FLAG_CARRY, (full_result > 0xFF));
 
     return result;
 }
@@ -900,7 +902,7 @@ void handle_ld_sp_hl(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
 }
 
 void handle_di(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
-    gb->ime = 0;
+    gb->ime = false;
     gb->ei_pending = 0;
 }
 
@@ -908,23 +910,23 @@ void handle_ei(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]) {
     gb->ei_pending = 2;
 }
 
-void fire_interrupt(dmg_gameboy_t *gb, uint8_t interrupt) {
+void fire_interrupt(dmg_gameboy_t *gb, interrupt interrupt) {
     gb->intf |= (1 << interrupt);
 }
-void clear_interrupt(dmg_gameboy_t *gb, uint8_t interrupt) {
+void clear_interrupt(dmg_gameboy_t *gb, interrupt interrupt) {
     gb->intf &= ~(1 << interrupt);
 }
 
 void check_interrupt(dmg_gameboy_t *gb) {
     uint8_t ints = gb->ie & gb->intf;
     uint8_t i;
+
+    if (gb->halted && ints != 0) {
+        gb->halted = false;
+        gb->cycles += 4;
+    }
     for (i=0; i<5; i++) {
         if ((ints & (1 << i)) != 0) {
-            if (gb->halted) {
-                gb->halted = false;
-                gb->cycles += 4;
-            }
-
             if (gb->ime) {
                 clear_interrupt(gb, i);
                 uint16_t handler = 0x40 + (0x8 * i);
@@ -935,6 +937,7 @@ void check_interrupt(dmg_gameboy_t *gb) {
 
                 gb->ime = 0;
                 gb->cycles += 20;
+                break;
             }
         } 
     }

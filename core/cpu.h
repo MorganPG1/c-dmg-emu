@@ -98,6 +98,13 @@ typedef enum {
     PREFIX_SET
 } prefix_block;
 
+typedef enum {
+    INT_VBLANK,
+    INT_STAT,
+    INT_TIMER,
+    INT_SERIAL,
+    INT_JOYPAD
+} interrupt;
 // Helper functions
 uint8_t read_imm8(dmg_gameboy_t *gb);
 uint16_t read_imm16(dmg_gameboy_t *gb);
@@ -174,7 +181,7 @@ void handle_ld_sp_hl(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
 void handle_di(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
 void handle_ei(dmg_gameboy_t *gb, uint8_t opcode, uint8_t cycles[2]);
 
-void fire_interrupt(dmg_gameboy_t *gb, uint8_t interrupt);
-void clear_interrupt(dmg_gameboy_t *gb, uint8_t interrupt);
+void fire_interrupt(dmg_gameboy_t *gb, interrupt interrupt);
+void clear_interrupt(dmg_gameboy_t *gb, interrupt interrupt);
 void check_interrupt(dmg_gameboy_t *gb);
 #endif

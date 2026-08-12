@@ -38,14 +38,18 @@ void handle_exitsig(int sig) {
 
 void step(dmg_gameboy_t *gb) {
     check_interrupt(gb);
-    
+
     uint8_t opcode = read_imm8(gb);
     gb->cycles += 4;
     step_io(gb, gb->cycles);
     execute_instr(gb, opcode);
-    step_io(gb, gb->cycles);
-    if (gb->ei_pending != 0) gb->ei_pending--;
+    step_io(gb, gb->cycles-4);
+    if (gb->ei_pending != 0) {
+        gb->ei_pending--;
+        if (gb->ei_pending == 0) gb->ime = true;
+    }
 }
+
 void mainloop(dmg_gameboy_t *gb) {
     uint64_t f_start = get_time_ns();
     while (gb->running) {
@@ -53,13 +57,15 @@ void mainloop(dmg_gameboy_t *gb) {
         while (t_cycles < CYCLES_PER_FRAME) {
             if (gb->debug) {
                 uint16_t pc = gb->pc;
-                GB_log("A:%02X F:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X IME:%i CYCLE:%i\n", gb->a, gb->f, gb->b, gb->c, gb->d, gb->e, gb->h, gb->l, gb->sp, pc, read_mem_8b(gb, pc), read_mem_8b(gb, pc+1), read_mem_8b(gb, pc+2),read_mem_8b(gb, pc+3), gb->ime, total_cycles);
+                GB_log("A:%02X F:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X IME:%i IF:%i IE:%i TAC:%02X TIMA:%02X INT_COUNT:%04X HALTED:%i CYCLE:%i\n", gb->a, gb->f, gb->b, gb->c, gb->d, gb->e, gb->h, gb->l, gb->sp, pc, read_mem_8b(gb, pc), read_mem_8b(gb, pc+1), read_mem_8b(gb, pc+2),read_mem_8b(gb, pc+3), gb->ime, gb->intf, gb->ie, gb->tac, gb->tima, gb->master_counter, gb->halted, total_cycles);
             }
             gb->cycles = 0;
             if (!gb->halted) {
                 step(gb);
             } else {
+                check_interrupt(gb);
                 gb->cycles += 4;
+                step_io(gb, gb->cycles);
             }
             t_cycles += gb->cycles;
             total_cycles += gb->cycles;
@@ -85,8 +91,15 @@ void mainloop(dmg_gameboy_t *gb) {
 }
 
 int main( int argc, char** argv ) {
-    dmg_gameboy_t *gb = init_gb(true, argv[1]);
-  
+    bool debug;
+    if (argc > 2) {
+        debug = true;
+    } else {
+        debug = false;
+    }
+    dmg_gameboy_t *gb = init_gb(debug, argv[1]);
+    
+    
     global_gb = gb;
     signal(SIGINT, handle_exitsig);
     signal(SIGTERM, handle_exitsig);

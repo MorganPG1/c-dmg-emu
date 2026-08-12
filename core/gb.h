@@ -83,6 +83,8 @@ typedef struct {
     uint8_t sram_bank;
     long rom_size;
     
+    char sb;
+    
     uint8_t tima;
     uint8_t tma;
     uint8_t div;

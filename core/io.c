@@ -1,5 +1,7 @@
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
+#include "cpu.h"
 #include "gb.h"
 static const uint8_t BIT_INDEXES[4] = {
     9, // FREQ 0 - bit 9 high (1024 T-Cycles)
@@ -8,8 +10,7 @@ static const uint8_t BIT_INDEXES[4] = {
     7  // FREQ 3 - bit 7 high (256 T-Cycles)
 };
 
-bool step_io(dmg_gameboy_t *gb, uint8_t cycles) {
-    bool irq = false;
+void step_io(dmg_gameboy_t *gb, uint8_t cycles) {
     uint8_t c;
     for (c=0; c<cycles; c++) {
         gb->master_counter++;
@@ -25,11 +26,12 @@ bool step_io(dmg_gameboy_t *gb, uint8_t cycles) {
             gb->tima++;
             if (gb->tima == 0) {
                 gb->tima = gb->tma;
-                irq = true;
+                fire_interrupt(gb, INT_TIMER);
             }
         }
+
+        gb->prev_signal = bit;
     }
-    return irq;
 }
 
 uint8_t read_io(dmg_gameboy_t *gb, uint16_t addr) {
@@ -44,15 +46,24 @@ uint8_t read_io(dmg_gameboy_t *gb, uint16_t addr) {
             return gb->tma;
         case 0x07:
             return gb->tac;
+        case 0xF:
+            return gb->intf;
         case 0x44:
             return 0x90;
         default:
-            return 0;
+            return 0xFF;
     }
 }
 
 void write_io(dmg_gameboy_t *gb, uint16_t addr, uint8_t val) {
     switch (addr) {
+        case 0x01:
+            gb->sb = val;
+        case 0x02:
+            if (val & 0x80 && !gb->debug) {
+                putc(gb->sb, stdout);
+                fflush(stdout);
+            }
         case 0x04:
             gb->div = val;
             break;
@@ -64,6 +75,9 @@ void write_io(dmg_gameboy_t *gb, uint16_t addr, uint8_t val) {
             break;
         case 0x07:
             gb->tac = val;
+            break;
+        case 0xF:
+            gb->intf = val;
             break;
         default:
             break;
