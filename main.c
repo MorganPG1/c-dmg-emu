@@ -1,4 +1,3 @@
-
 #include "core/cpu.h"
 #include "core/gb.h"
 #include <stdbool.h>
@@ -63,7 +62,7 @@ void mainloop(dmg_gameboy_t *gb) {
         uint64_t f_end = get_time_ns();
         uint64_t elapsed = f_end - f_start;
 
-        if (elapsed < TARGET_FRAME_TIME_NS && gb->debug) {
+        if (elapsed < TARGET_FRAME_TIME_NS && ! gb->debug) {
             struct timespec sleep_time;
             uint64_t remaining = TARGET_FRAME_TIME_NS - elapsed;
 
