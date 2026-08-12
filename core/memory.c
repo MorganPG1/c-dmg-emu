@@ -1,6 +1,7 @@
 #include "memory.h"
 #include "gb.h"
 #include "rom.h"
+#include "io.h"
 #include <linux/limits.h>
 #include <stdint.h>
 
@@ -78,6 +79,7 @@ void write_mem_8b(dmg_gameboy_t *gb, uint16_t addr, uint8_t val) {
         case REGION_UNUSABLE:
             break;
         case REGION_IO:
+            write_io(gb, offset, val);
             break;
         case REGION_HRAM:
             gb->hram[offset] = val;
@@ -121,9 +123,7 @@ uint8_t read_mem_8b(dmg_gameboy_t *gb, uint16_t addr) {
         case REGION_UNUSABLE:
             break;
         case REGION_IO:
-            if (addr == 0xFF44) {
-                return 0x90;
-            }
+            result = read_io(gb, offset);
             break;
         case REGION_HRAM:
             result = gb->hram[offset];

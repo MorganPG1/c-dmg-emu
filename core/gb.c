@@ -37,6 +37,13 @@ dmg_gameboy_t* init_gb(bool debug, const char* rom_path) {
     gb->sp = 0xFFFE;
     gb->pc = 0x0100;
 
+    gb->tima = 0;
+    gb->tma = 0;
+    gb->div = 0;
+    gb->tac = 0;
+    gb->master_counter = 0;
+    gb->prev_signal = false;
+
     gb->rom_bank = 1;
     gb->sram_bank = 0;
     gb->sram_en = true;
