@@ -6,6 +6,7 @@
 log*.txt
 *.sym
 *.o
+perf.data*
 ./dmg_emu_py
 build/
 .cache/
