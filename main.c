@@ -7,7 +7,7 @@
 #include <time.h>
 #include <signal.h>
 #include "core/boilerplate.h"
-#include "memory.h"
+#include "core/memory.h"
 
 #define CYCLES_PER_FRAME 70224
 #define TARGET_FRAME_TIME_NS 16742706
@@ -27,7 +27,7 @@ void clean_exit(dmg_gameboy_t *gb) {
     free(gb);
 }
 
-void handle_sigint(int sig) {
+void handle_exitsig(int sig) {
     if (global_gb) {
         clean_exit(global_gb);
     }
@@ -78,11 +78,10 @@ void mainloop(dmg_gameboy_t *gb) {
 
 int main( int argc, char** argv ) {
     dmg_gameboy_t *gb = init_gb(true, argv[1]);
-    if (!gb) return 1;
-
+  
     global_gb = gb;
-    signal(SIGINT, handle_sigint);
-    signal(SIGTERM, handle_sigint);
+    signal(SIGINT, handle_exitsig);
+    signal(SIGTERM, handle_exitsig);
 
     mainloop(gb);
     GB_log("Exiting, gb->running was set to false\n");
