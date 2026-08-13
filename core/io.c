@@ -56,8 +56,20 @@ uint8_t read_io(dmg_gameboy_t *gb, uint16_t addr) {
             return gb->tac;
         case 0xF:
             return gb->intf;
+        case 0x40:
+            return gb->lcdc;
+        case 0x42:
+            return gb->scy;
+        case 0x43:
+            return gb->scx;
         case 0x44:
-            return 0x90;
+            return gb->ly;
+        case 0x45:
+            return gb->lyc;
+        case 0x4A:
+            return gb->wy;
+        case 0x4B:
+            return gb->wx;
         default:
             return 0xFF;
     }
@@ -86,6 +98,24 @@ void write_io(dmg_gameboy_t *gb, uint16_t addr, uint8_t val) {
             break;
         case 0xF:
             gb->intf = val;
+            break;
+        case 0x40:
+            gb->lcdc = val;
+            break;
+        case 0x42:
+            gb->scy = val;
+            break;
+        case 0x43:
+            gb->scx = val;
+            break;
+        case 0x45:
+            gb->lyc = val;
+            break;
+        case 0x4A:
+            gb->wy = val;
+            break;
+        case 0x4B:
+            gb->wx = val;
             break;
         default:
             break;

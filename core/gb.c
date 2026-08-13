@@ -57,6 +57,17 @@ dmg_gameboy_t* init_gb(bool debug, const char* rom_path) {
     gb->sdl_renderer = NULL;
     gb->sdl_texture = NULL;
     gb->sdl_win = NULL;
+    gb->ppu_cycles = 0;
+    gb->ppu_mode = PPU_OBJ_SCAN;
+    gb->obj_c = 0;
+
+    gb->lcdc = 0x80;
+    gb->ly = 0;
+    gb->lyc = 0;
+    gb->scx = 0;
+    gb->scy = 0;
+    gb->wy = 0;
+    gb->wx = 0;
 
     if (!init_rom(gb, rom_path)) {
         fprintf(stderr, "Unable to read rom file: %s\n", rom_path);
@@ -64,7 +75,7 @@ dmg_gameboy_t* init_gb(bool debug, const char* rom_path) {
         exit(1);
     }
 
-    init_ppu(gb);
+    ppu_init(gb);
     return gb;
 }
 

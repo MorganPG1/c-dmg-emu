@@ -22,6 +22,21 @@
 #define SRAM_SIZE_BYTES 131072 // allocate the most size used by a cartridge because thats the easiest way to do this
 
 typedef enum {
+    PPU_HBLANK,
+    PPU_VBLANK,
+    PPU_OBJ_SCAN,
+    PPU_RENDERING
+} ppu_mode;
+
+typedef struct {
+    bool is_16px;
+    uint8_t x;
+    uint8_t y;
+    uint8_t tile_ind;
+    uint8_t attr;
+} OAMSprite;
+
+typedef enum {
     MBC0,
     MBC1,
     MBC2,
@@ -95,9 +110,23 @@ typedef struct {
     uint16_t master_counter;
     bool prev_signal;
 
+    uint32_t fb[23040];
     SDL_Window* sdl_win;
     SDL_Renderer* sdl_renderer;
     SDL_Texture* sdl_texture;
+    uint16_t ppu_cycles;
+    ppu_mode ppu_mode;
+    uint8_t obj_c;
+    OAMSprite objs_on_line[10];
+
+    uint8_t lcdc;
+    uint8_t ly;
+    uint8_t lyc;
+    uint8_t scx;
+    uint8_t scy;
+    uint8_t wy;
+    uint8_t wx;
+
     bool sram_en;
     bool ime;
     bool running;
