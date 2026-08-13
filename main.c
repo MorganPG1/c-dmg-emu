@@ -27,11 +27,9 @@ uint64_t get_time_ns(void) {
 
 void handle_exitsig(int sig) {
     if (global_gb) {
-        GB_free(global_gb);
-    }
-    SDL_Quit();
-    printf("Total cycles: %lu\n", total_cycles);
-    exit(0);
+        global_gb->running = false;
+    };
+    printf("\nTotal cycles: %lu\n", total_cycles);
 }
 
 void step(dmg_gameboy_t *gb) {
@@ -116,7 +114,7 @@ int main( int argc, char** argv ) {
     signal(SIGTERM, handle_exitsig);
 
     mainloop(gb);
-    GB_log("Exiting, gb->running was set to false\n");
+    GB_log("Exiting.\n");
     GB_free(gb);
 }
 
