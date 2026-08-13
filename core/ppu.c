@@ -6,6 +6,7 @@
 #include <SDL2/SDL_pixels.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_video.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <wchar.h>
 
@@ -55,7 +56,32 @@ void ppu_init(dmg_gameboy_t *gb) {
     gb->sdl_texture = SDL_CreateTexture(gb->sdl_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, GB_FB_W, GB_FB_H);
 }
 void ppu_scan(dmg_gameboy_t *gb, bool obj_size, bool obj_en) {
-    return;
+    if (!obj_en) return;
+
+    int obj;
+    for (obj=0; obj<40; obj++) {
+        uint16_t start_addr = (4 * obj);
+        uint8_t y = gb->oam[start_addr];
+        uint8_t x = gb->oam[start_addr + 1];
+        uint8_t ind = gb->oam[start_addr + 2];
+        uint8_t attr = gb->oam[start_addr + 3];
+        int start_line = y - 16;
+
+        uint8_t offset = 8;
+        if (obj_size) offset = 16;    
+            
+        if (((start_line) <= (gb->ly)) && ((gb->ly) < (start_line + offset))) {
+            gb->objs_on_line[gb->obj_c].y = y;
+            gb->objs_on_line[gb->obj_c].x = x;
+            gb->objs_on_line[gb->obj_c].tile_ind = ind;
+            gb->objs_on_line[gb->obj_c].attr = attr;
+            gb->objs_on_line[gb->obj_c].is_16px = obj_size;
+            gb->obj_c++;
+        } 
+        if (gb->obj_c >= 10) {
+            break;
+        }
+    }
 }
 
 void ppu_render_scanline(dmg_gameboy_t *gb, bool bg_en, bool bg_tile_map_area, bool data_area, bool window_en, bool window_tile_map_area) {
