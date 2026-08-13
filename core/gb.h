@@ -9,6 +9,9 @@
 #ifndef GB_H
 #define GB_H
 
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_render.h>
+#include <SDL2/SDL_video.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -92,6 +95,9 @@ typedef struct {
     uint16_t master_counter;
     bool prev_signal;
 
+    SDL_Window* sdl_win;
+    SDL_Renderer* sdl_renderer;
+    SDL_Texture* sdl_texture;
     bool sram_en;
     bool ime;
     bool running;
@@ -104,4 +110,5 @@ dmg_gameboy_t* init_gb(bool debug, const char* rom_path);
 void GB_log(const char* format, ...);
 void GB_log_err(const char* format, ...);
 void GB_stop_err(dmg_gameboy_t *gb, const char* format, ...);
+void GB_free(dmg_gameboy_t *gb);
 #endif

@@ -9,6 +9,7 @@
 #include "core/io.h"
 #include "core/boilerplate.h"
 #include "core/memory.h"
+#include <SDL2/SDL.h>
 
 #define CYCLES_PER_FRAME 70224
 #define TARGET_FRAME_TIME_NS 16742706
@@ -21,17 +22,12 @@ uint64_t get_time_ns(void) {
     return (uint64_t)ts.tv_sec * 1000000000ULL + ts.tv_nsec;
 }
 
-void clean_exit(dmg_gameboy_t *gb) {
-    if (gb->rom) {
-        free(gb->rom);
-    }
-    free(gb);
-}
 
 void handle_exitsig(int sig) {
     if (global_gb) {
-        clean_exit(global_gb);
+        GB_free(global_gb);
     }
+    SDL_Quit();
     printf("Total cycles: %lu\n", total_cycles);
     exit(0);
 }
@@ -106,6 +102,6 @@ int main( int argc, char** argv ) {
 
     mainloop(gb);
     GB_log("Exiting, gb->running was set to false\n");
-    clean_exit(gb);
+    GB_free(gb);
 }
 

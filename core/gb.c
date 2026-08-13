@@ -7,10 +7,14 @@
 */
 #include "gb.h"
 #include "rom.h"
+#include "ppu.h"
+#include <SDL2/SDL_render.h>
+#include <SDL2/SDL_video.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <wchar.h>
 
 dmg_gameboy_t* init_gb(bool debug, const char* rom_path) {
     dmg_gameboy_t* gb = malloc(sizeof(dmg_gameboy_t));
@@ -49,13 +53,18 @@ dmg_gameboy_t* init_gb(bool debug, const char* rom_path) {
     gb->rom_bank = 1;
     gb->sram_bank = 0;
     gb->sram_en = true;
-    
+
+    gb->sdl_renderer = NULL;
+    gb->sdl_texture = NULL;
+    gb->sdl_win = NULL;
+
     if (!init_rom(gb, rom_path)) {
         fprintf(stderr, "Unable to read rom file: %s\n", rom_path);
         free(gb);
         exit(1);
     }
 
+    init_ppu(gb);
     return gb;
 }
 
@@ -80,4 +89,20 @@ void GB_stop_err(dmg_gameboy_t *gb, const char *format, ...) {
     va_start(args, format);
     vprintf(format, args);
     gb->running = false;
+}
+
+void GB_free(dmg_gameboy_t *gb) {
+    if (gb->rom) {
+        free(gb->rom);
+    }
+    if (gb->sdl_texture) {
+        SDL_DestroyTexture(gb->sdl_texture);
+    }
+    if (gb->sdl_renderer) {
+        SDL_DestroyRenderer(gb->sdl_renderer);
+    }
+    if (gb->sdl_win) {
+        SDL_DestroyWindow(gb->sdl_win);
+    }
+    free(gb);
 }
