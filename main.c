@@ -61,41 +61,23 @@ void mainloop(dmg_gameboy_t *gb) {
             }
             
         }
-        uint32_t t_cycles = 0;
-        while (t_cycles < CYCLES_PER_FRAME) {
-            if (gb->debug) {
-                uint16_t pc = gb->pc;
-                GB_log("A:%02X F:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X IME:%i IF:%i IE:%i TAC:%02X TIMA:%02X INT_COUNT:%04X HALTED:%i LCDC:%i LY:%i PPU_C:%i CYCLE:%i\n", gb->a, gb->f, gb->b, gb->c, gb->d, gb->e, gb->h, gb->l, gb->sp, pc, read_mem_8b(gb, pc), read_mem_8b(gb, pc+1), read_mem_8b(gb, pc+2),read_mem_8b(gb, pc+3), gb->ime, gb->intf, gb->ie, gb->tac, gb->tima, gb->master_counter, gb->halted, gb->lcdc, gb->ly, gb->ppu_cycles, total_cycles);
-            }
-            gb->cycles = 0;
-            if (!gb->halted) {
-                step(gb);
-            } else {
-                check_interrupt(gb);
-                gb->cycles += 4;
-                step_io(gb, gb->cycles);
-                ppu_step(gb, gb->cycles);
-            }
-            t_cycles += gb->cycles;
-            total_cycles += gb->cycles;
-            
-            
-        }
-        // this clock speed limiter will be replaced with vsync through SDL when i start working on PPU emulation, but for now it will do.
-        uint64_t f_end = get_time_ns();
-        uint64_t elapsed = f_end - f_start;
-
-        if (elapsed < TARGET_FRAME_TIME_NS && gb->debug) {
-            struct timespec sleep_time;
-            uint64_t remaining = TARGET_FRAME_TIME_NS - elapsed;
-
-            sleep_time.tv_sec =  remaining / 1000000000ULL;
-            sleep_time.tv_nsec = remaining % 1000000000ULL;
-            
-            nanosleep(&sleep_time, NULL);
+        
+        if (gb->debug) {
+            uint16_t pc = gb->pc;
+            GB_log("A:%02X F:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X IME:%i IF:%i IE:%i TAC:%02X TIMA:%02X INT_COUNT:%04X HALTED:%i LCDC:%i LY:%i PPU_C:%i CYCLE:%i\n", gb->a, gb->f, gb->b, gb->c, gb->d, gb->e, gb->h, gb->l, gb->sp, pc, read_mem_8b(gb, pc), read_mem_8b(gb, pc+1), read_mem_8b(gb, pc+2),read_mem_8b(gb, pc+3), gb->ime, gb->intf, gb->ie, gb->tac, gb->tima, gb->master_counter, gb->halted, gb->lcdc, gb->ly, gb->ppu_cycles, total_cycles);
         }
 
-        f_start = get_time_ns();
+        gb->cycles = 0;
+        if (!gb->halted) { // this is a really stupid way to do this i'll redo this when i feel like it
+            step(gb);
+        } else {
+            check_interrupt(gb);
+            gb->cycles += 4;
+            step_io(gb, gb->cycles);
+            ppu_step(gb, gb->cycles);
+        }
+
+        total_cycles += gb->cycles;
     }
 }
 
