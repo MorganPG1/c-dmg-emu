@@ -3,7 +3,7 @@
  * 
  * core/rom.h
  * 
- * Header file for the rom/mbc related functions
+ * Header file for the ROM/MBC related functions
 */
 #ifndef ROM_H
 #define ROM_H

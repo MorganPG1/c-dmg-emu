@@ -3,7 +3,7 @@
  * 
  * core/gb.h
  * 
- * Main gameboy initialisation function
+ * Main gameboy initialisation functions
 */
 #include "gb.h"
 #include "rom.h"

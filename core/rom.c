@@ -1,3 +1,10 @@
+/*
+ * C DMG Gameboy Emulator Project - MorganPG
+ * 
+ * core/rom.h
+ * 
+ * C file for the ROM/MBC related functions
+*/
 #include "rom.h"
 #include "gb.h"
 #include <stdbool.h>

@@ -1,3 +1,10 @@
+/*
+ * C DMG Gameboy Emulator Project - MorganPG
+ * 
+ * core/cpu.h
+ * 
+ * C file for the CPU instruction handler functions
+*/
 #include "gb.h"
 #include "cpu.h"
 #include "memory.h"

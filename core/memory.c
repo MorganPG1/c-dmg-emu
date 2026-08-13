@@ -1,3 +1,10 @@
+/*
+ * C DMG Gameboy Emulator Project - MorganPG
+ * 
+ * core/memory.h
+ * 
+ * C file for the memory related functions
+*/
 #include "memory.h"
 #include "gb.h"
 #include "rom.h"

@@ -1,3 +1,11 @@
+/*
+ * C DMG Gameboy Emulator Project - MorganPG
+ * 
+ * core/cpu.h
+ * 
+ * C file for the generic I/O (e.g. serial, timer, etc)
+*/
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>

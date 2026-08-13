@@ -72,7 +72,7 @@ void mainloop(dmg_gameboy_t *gb) {
             
             
         }
-
+        // this clock speed limiter will be replaced with vsync through SDL when i start working on PPU emulation, but for now it will do.
         uint64_t f_end = get_time_ns();
         uint64_t elapsed = f_end - f_start;
 
