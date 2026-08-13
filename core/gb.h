@@ -127,6 +127,8 @@ typedef struct {
     uint8_t wy;
     uint8_t wx;
 
+    uint8_t joyp;
+    
     bool sram_en;
     bool ime;
     bool running;

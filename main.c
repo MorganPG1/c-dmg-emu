@@ -1,5 +1,6 @@
 #include "core/cpu.h"
 #include "core/gb.h"
+#include <SDL2/SDL_events.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -54,9 +55,13 @@ void mainloop(dmg_gameboy_t *gb) {
     while (gb->running) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) {
-                handle_exitsig(0);
+            switch (event.type) {
+                case SDL_QUIT:
+                    handle_exitsig(0);
+                case SDL_KEYDOWN:
+                    fire_interrupt(gb, INT_JOYPAD);
             }
+            
         }
         uint32_t t_cycles = 0;
         while (t_cycles < CYCLES_PER_FRAME) {
@@ -71,6 +76,7 @@ void mainloop(dmg_gameboy_t *gb) {
                 check_interrupt(gb);
                 gb->cycles += 4;
                 step_io(gb, gb->cycles);
+                ppu_step(gb, gb->cycles);
             }
             t_cycles += gb->cycles;
             total_cycles += gb->cycles;
@@ -81,7 +87,7 @@ void mainloop(dmg_gameboy_t *gb) {
         uint64_t f_end = get_time_ns();
         uint64_t elapsed = f_end - f_start;
 
-        if (elapsed < TARGET_FRAME_TIME_NS && !gb->debug) {
+        if (elapsed < TARGET_FRAME_TIME_NS && gb->debug) {
             struct timespec sleep_time;
             uint64_t remaining = TARGET_FRAME_TIME_NS - elapsed;
 

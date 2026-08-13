@@ -116,7 +116,7 @@ uint8_t read_mem_8b(dmg_gameboy_t *gb, uint16_t addr) {
             result = gb->vram[offset];
             break;
         case REGION_SRAM:
-            result = read_sram(gb, addr);
+            result = read_sram(gb, offset);
             break;
         case REGION_WRAM:
             result = gb->wram[offset];

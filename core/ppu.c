@@ -5,6 +5,7 @@
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_pixels.h>
 #include <SDL2/SDL_render.h>
+#include <SDL2/SDL_scancode.h>
 #include <SDL2/SDL_video.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -89,9 +90,9 @@ void ppu_render_scanline(dmg_gameboy_t *gb, bool bg_en, bool bg_tile_map_area, b
     uint16_t window_tm = 0x1800;
     uint32_t *line = &gb->fb[gb->ly * GB_FB_W];
     uint8_t bg_y = (gb->ly + gb->scy);
-    uint8_t wind_y = (gb->ly - gb->wy);
+    int wind_y = (gb->ly - gb->wy);
     uint8_t row = bg_y % 8;
-    uint8_t wrow = wind_y % 8;
+    int wrow = wind_y % 8;
 
     if (bg_tile_map_area) tm = 0x1C00;
     if (window_tile_map_area) window_tm = 0x1C00;
@@ -108,8 +109,8 @@ void ppu_render_scanline(dmg_gameboy_t *gb, bool bg_en, bool bg_tile_map_area, b
             if (data_area) {
                 tile_addr = ind * 16;
             } else {
-                int8_t signed_int = (int8_t)ind * 16;
-                tile_addr = 0x1000 + (signed_int);
+                int signed_int = (int8_t)ind;
+                tile_addr = 0x1000 + (signed_int * 16);
             }
 
             uint8_t column = bg_x % 8;
@@ -136,8 +137,8 @@ void ppu_render_scanline(dmg_gameboy_t *gb, bool bg_en, bool bg_tile_map_area, b
             if (data_area) {
                 tile_addr = ind * 16;
             } else {
-                int8_t signed_int = (int8_t)ind * 16;
-                tile_addr = 0x1000 + (signed_int);
+                int signed_int = (int8_t)ind;
+                tile_addr = 0x1000 + (signed_int * 16);
             }
 
             uint8_t column = wind_x % 8;
@@ -151,54 +152,55 @@ void ppu_render_scanline(dmg_gameboy_t *gb, bool bg_en, bool bg_tile_map_area, b
 
             uint8_t pxl = (bit1 << 1) | bit0;
             line[i] = PALETTE[pxl];
-        }
-
-        if (gb->obj_c != 0) {
-            int ind;
-            for (ind=0; ind<gb->obj_c; ind++) {
-                OAMSprite sprite = gb->objs_on_line[ind];
-                int x = (sprite.x) - 8;
-                int y = (sprite.y) - 16;
-                uint16_t ind = sprite.tile_ind * 16;
             
-                bool bank = (sprite.attr & 0x8) != 0;
-                bool priority = (sprite.attr & 0x80) != 0;
-                bool x_flip = (sprite.attr & 0x20) != 0;
-                bool y_flip = (sprite.attr & 0x40) != 0;
-                uint8_t h = 8;
-                uint8_t row = gb->ly - y;
-                
-                if (bank) ind += 0x400;
-                if (sprite.is_16px) h = 16;
-                if (y_flip) row = (h - 1) - row;
+        }
+    }
+    if (gb->obj_c != 0) {
+        int ind;
+        for (ind=0; ind<gb->obj_c; ind++) {
+            OAMSprite sprite = gb->objs_on_line[ind];
+            int x = (sprite.x) - 8;
+            int y = (sprite.y) - 16;
+            uint16_t ind = sprite.tile_ind * 16;
+        
+            bool bank = (sprite.attr & 0x8) != 0;
+            bool priority = (sprite.attr & 0x80) != 0;
+            bool x_flip = (sprite.attr & 0x20) != 0;
+            bool y_flip = (sprite.attr & 0x40) != 0;
+            uint8_t h = 8;
+            uint8_t row = gb->ly - y;
+            
+            if (bank) ind += 0x400;
+            if (sprite.is_16px) h = 16;
+            if (y_flip) row = (h - 1) - row;
 
-                int tx;
-                for (tx = 0; tx < 8; tx++) {
-                    uint8_t scr_x = x + tx;
+            int tx;
+            for (tx = 0; tx < 8; tx++) {
+                uint8_t scr_x = x + tx;
 
-                    if ((scr_x < 0) || (scr_x >= 160)) {
+                if ((scr_x < 0) || (scr_x >= 160)) {
+                    continue;
+                }
+
+                if (!priority || (gb->fb[(gb->ly * 160) + scr_x] == PALETTE[0])) {
+                    uint8_t bitpos = 7 - tx;
+                    if (x_flip) bitpos = tx;
+
+                    uint8_t b1 = gb->vram[ind + (row * 2)];
+                    uint8_t b2 = gb->vram[ind + (row * 2) + 1];
+
+                    uint8_t bit0 = (b1 >> bitpos) & 0x01;
+                    uint8_t bit1 = (b2 >> bitpos) & 0x01;
+
+                    uint8_t pxl = (bit1 << 1) | bit0;
+                    if (pxl == 0) {
                         continue;
                     }
 
-                    if (!priority || !(gb->fb[(gb->ly * 160) + scr_x] == PALETTE[0])) {
-                        uint8_t bitpos = 7 - tx;
-                        if (x_flip) bitpos = tx;
+                    gb->fb[(gb->ly * 160) + scr_x] = PALETTE[pxl];
 
-                        uint8_t b1 = gb->vram[ind + (row * 2)];
-                        uint8_t b2 = gb->vram[ind + (row * 2) + 1];
-
-                        uint8_t bit0 = (b1 >> bitpos) & 0x01;
-                        uint8_t bit1 = (b2 >> bitpos) & 0x01;
-
-                        uint8_t pxl = (bit1 << 1) | bit0;
-                        if (pxl == 0) {
-                            continue;
-                        }
-
-                        gb->fb[(gb->ly * 160) + scr_x] = PALETTE[pxl];
-                    }
+                    
                 }
-                
             }
         }
     }
@@ -273,6 +275,42 @@ void ppu_step(dmg_gameboy_t *gb, uint8_t cycles) {
                 break;
         }
     }
-    
+
     return;
+}
+
+uint8_t ppu_poll_joyp(dmg_gameboy_t *gb) {
+    uint8_t normal = 0;
+    uint8_t dir = 0;
+    const uint8_t *state = SDL_GetKeyboardState(NULL);
+    if (state[SDL_SCANCODE_Z]) normal |= 0x1;
+    if (state[SDL_SCANCODE_X]) normal |= 0x2;
+    if (state[SDL_SCANCODE_RSHIFT]) normal |= 0x4;
+    if (state[SDL_SCANCODE_RETURN]) normal |= 0x8;
+
+    if (state[SDL_SCANCODE_RIGHT]) dir |= 0x1;
+    if (state[SDL_SCANCODE_LEFT]) dir |= 0x2;
+    if (state[SDL_SCANCODE_UP]) dir |= 0x4;
+    if (state[SDL_SCANCODE_DOWN]) dir |= 0x8;
+    
+    uint8_t selected = (gb->joyp >> 4) & 0b11;
+
+    uint8_t low = 0;
+    uint8_t high = (gb->joyp & 0x30);
+
+    switch (selected) {
+        case 0:
+            low = (normal & dir);
+            break;
+        case 1:
+            low = (normal);
+            break;
+        case 2:
+            low = (dir);
+            break;
+        case 3:
+            low = (0xF);
+            break;
+    }
+    return ((~low) | high);
 }

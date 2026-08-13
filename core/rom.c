@@ -68,8 +68,8 @@ uint8_t read_mbc1(dmg_gameboy_t *gb, uint16_t addr) {
     if (addr < 0x4000) {
         return gb->rom[addr];
     } else {
-        uint16_t phy_addr = (gb->rom_bank * 0x4000) + (addr - 0x4000);
-        if (phy_addr <= gb->rom_size) {
+        uint32_t phy_addr = (gb->rom_bank * 0x4000) + (addr - 0x4000);
+        if (phy_addr < gb->rom_size) {
             return gb->rom[phy_addr];
         } else {
             return 0xFF;
@@ -83,10 +83,11 @@ void write_mbc0(dmg_gameboy_t *gb, uint16_t addr, uint8_t val) {
 
 void write_mbc1(dmg_gameboy_t *gb, uint16_t addr, uint8_t val) {
     if ((addr >= 0x2000) && (addr < 0x4000)) {
-        if (val == 0) {
+        uint8_t bank = val;
+        if (bank == 0) {
             gb->rom_bank = 1;
         } else {
-            gb->rom_bank = val;
+            gb->rom_bank = bank;
         }
     }
 }

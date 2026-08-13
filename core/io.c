@@ -11,6 +11,8 @@
 #include <stdio.h>
 #include "cpu.h"
 #include "gb.h"
+#include "memory.h"
+#include "ppu.h"
 static const uint8_t BIT_INDEXES[4] = {
     9, // FREQ 0 - bit 9 high (1024 T-Cycles)
     3, // FREQ 1 - bit 3 high (16 T-Cycles)
@@ -45,7 +47,7 @@ void step_io(dmg_gameboy_t *gb, uint8_t cycles) {
 uint8_t read_io(dmg_gameboy_t *gb, uint16_t addr) {
     switch (addr) {
         case 0x00: // joyp
-            return 0xFF;
+            return ppu_poll_joyp(gb);
         case 0x04:
             return gb->div;
         case 0x05:
@@ -58,6 +60,8 @@ uint8_t read_io(dmg_gameboy_t *gb, uint16_t addr) {
             return gb->intf;
         case 0x40:
             return gb->lcdc;
+        case 0x41:
+            return 0x00;
         case 0x42:
             return gb->scy;
         case 0x43:
@@ -77,13 +81,18 @@ uint8_t read_io(dmg_gameboy_t *gb, uint16_t addr) {
 
 void write_io(dmg_gameboy_t *gb, uint16_t addr, uint8_t val) {
     switch (addr) {
+        case 0x00:
+            gb->joyp = val;
+            break;
         case 0x01:
             gb->sb = val;
+            break;
         case 0x02:
             if (val & 0x80 && !gb->debug) {
                 putc(gb->sb, stdout);
                 fflush(stdout);
             }
+            break;
         case 0x04:
             gb->div = val;
             break;
@@ -111,6 +120,14 @@ void write_io(dmg_gameboy_t *gb, uint16_t addr, uint8_t val) {
         case 0x45:
             gb->lyc = val;
             break;
+        case 0x46: {
+            uint16_t addr = (val << 8) & 0xDF00;
+            int a;
+            for (a=addr; a < addr+0xA0; a++) {
+                gb->oam[a-addr] = read_mem_8b(gb, a);
+            }
+            break;
+        }
         case 0x4A:
             gb->wy = val;
             break;
