@@ -12,6 +12,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_video.h>
+#include <cstdint>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -127,6 +128,10 @@ typedef struct {
     uint8_t scy;
     uint8_t wy;
     uint8_t wx;
+
+    uint8_t bgp; // BG palette
+    uint8_t obp0; // OBJ palette 0
+    uint8_t obp1; // OBJ palette 1
 
     uint8_t joyp;
     
