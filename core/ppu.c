@@ -7,6 +7,7 @@
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_scancode.h>
 #include <SDL2/SDL_video.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <wchar.h>
@@ -270,7 +271,16 @@ void ppu_step(dmg_gameboy_t *gb, uint8_t cycles) {
                     
                     memset(gb->fb, 0, sizeof(gb->fb));
                     
-                    
+                    SDL_Event event;
+                    while (SDL_PollEvent(&event)) {
+                        switch (event.type) {
+                            case SDL_QUIT:
+                                gb->running = false;
+                            case SDL_KEYDOWN:
+                                fire_interrupt(gb, INT_JOYPAD);
+                        }
+                        
+                    }
                 }
                 break;
         }

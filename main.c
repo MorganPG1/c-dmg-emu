@@ -3,7 +3,6 @@
 #include <SDL2/SDL_events.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <stdint.h>
 #include <time.h>
 #include <signal.h>
@@ -51,17 +50,6 @@ void step(dmg_gameboy_t *gb) {
 void mainloop(dmg_gameboy_t *gb) {
     uint64_t f_start = get_time_ns();
     while (gb->running) {
-        SDL_Event event;
-        while (SDL_PollEvent(&event)) {
-            switch (event.type) {
-                case SDL_QUIT:
-                    handle_exitsig(0);
-                case SDL_KEYDOWN:
-                    fire_interrupt(gb, INT_JOYPAD);
-            }
-            
-        }
-        
         if (gb->debug) {
             uint16_t pc = gb->pc;
             GB_log("A:%02X F:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X IME:%i IF:%i IE:%i TAC:%02X TIMA:%02X INT_COUNT:%04X HALTED:%i LCDC:%i LY:%i PPU_C:%i CYCLE:%i\n", gb->a, gb->f, gb->b, gb->c, gb->d, gb->e, gb->h, gb->l, gb->sp, pc, read_mem_8b(gb, pc), read_mem_8b(gb, pc+1), read_mem_8b(gb, pc+2),read_mem_8b(gb, pc+3), gb->ime, gb->intf, gb->ie, gb->tac, gb->tima, gb->master_counter, gb->halted, gb->lcdc, gb->ly, gb->ppu_cycles, total_cycles);
