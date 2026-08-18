@@ -103,6 +103,7 @@ typedef struct {
     
     char sb;
     
+    uint8_t tima_overflow_counter;
     uint8_t tima;
     uint8_t tma;
     uint8_t div;

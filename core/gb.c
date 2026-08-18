@@ -41,6 +41,7 @@ dmg_gameboy_t* init_gb(bool debug, const char* rom_path) {
     gb->sp = 0xFFFE;
     gb->pc = 0x0100;
 
+    gb->tima_overflow_counter = 0;
     gb->tima = 0;
     gb->tma = 0;
     gb->div = 0;

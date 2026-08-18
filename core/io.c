@@ -23,6 +23,13 @@ static const uint8_t BIT_INDEXES[4] = {
 void step_io(dmg_gameboy_t *gb, uint8_t cycles) {
     uint8_t c;
     for (c=0; c<cycles; c++) {
+        if (gb->tima_overflow_counter != 0) {
+            gb->tima_overflow_counter--;
+            if (gb->tima_overflow_counter == 0) {
+                gb->tima = gb->tma;
+                fire_interrupt(gb, INT_TIMER);
+            }
+        }
         gb->master_counter++;
         gb->div = (gb->master_counter >> 8) & 0xFF;
         
@@ -34,9 +41,8 @@ void step_io(dmg_gameboy_t *gb, uint8_t cycles) {
 
         if ((!bit) && (gb->prev_signal) && (en)) {
             gb->tima++;
-            if (gb->tima == 0) {
-                gb->tima = gb->tma;
-                fire_interrupt(gb, INT_TIMER);
+            if (gb->tima == 0 && gb->tima_overflow_counter == 0) {
+                gb->tima_overflow_counter = 4;
             }
         }
 
