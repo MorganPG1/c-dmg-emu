@@ -28,6 +28,7 @@ void handle_exitsig(int sig) {
     if (global_gb) {
         global_gb->running = false;
     };
+    
     printf("\nTotal cycles: %lu\n", total_cycles);
 }
 

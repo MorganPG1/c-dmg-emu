@@ -99,6 +99,7 @@ typedef struct {
     mbc mbc;
     uint8_t rom_bank;
     uint8_t sram_bank;
+    FILE* sram_fp;
     long rom_size;
     
     char sb;

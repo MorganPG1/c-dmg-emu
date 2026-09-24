@@ -11,6 +11,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <wchar.h>
 
 void read_rom_metadata(dmg_gameboy_t *gb) {
     uint8_t cart_type = gb->rom[0x147];
@@ -25,8 +27,16 @@ void read_rom_metadata(dmg_gameboy_t *gb) {
     gb->mbc = cart_mbc;
 }
 
-bool init_rom(dmg_gameboy_t *gb, const char* rom_path) {
+bool init_rom(dmg_gameboy_t *gb, char* rom_path) {
     FILE* ptr = fopen(rom_path, "rb");
+    char* sram_path = strcat(rom_path, ".sav");
+
+    FILE* tmp_sram_fp = fopen(sram_path, "rb");
+    if (tmp_sram_fp != NULL) {
+        fread(gb->sram, 1, sizeof(gb->sram), tmp_sram_fp);
+        fclose(tmp_sram_fp);
+    }
+    
 
     if (ptr == NULL) {
         return false;
@@ -57,6 +67,12 @@ bool init_rom(dmg_gameboy_t *gb, const char* rom_path) {
     
     gb->rom_size = fsize;
     read_rom_metadata(gb);
+
+    gb->sram_fp = fopen(sram_path, "wb");
+    if (gb->sram_fp == NULL) {
+        return false;
+    }
+    fwrite(&gb->sram, 1,sizeof(gb->sram),gb->sram_fp);
     return true;
 }
 
@@ -89,6 +105,9 @@ void write_mbc1(dmg_gameboy_t *gb, uint16_t addr, uint8_t val) {
         } else {
             gb->rom_bank = bank;
         }
+    } else if ((addr >= 0x4000) && (addr < 0x5FFF)) {
+        uint8_t bank = val;
+        gb->sram_bank = bank;
     }
 }
 
@@ -120,9 +139,11 @@ void write_rom(dmg_gameboy_t *gb, uint16_t addr, uint8_t val) {
 }
 
 uint8_t read_sram(dmg_gameboy_t *gb, uint16_t addr) {
-    return gb->sram[addr];
+    return gb->sram[(gb->sram_bank * 0x2000) + addr];
 }
 
 void write_sram(dmg_gameboy_t *gb, uint16_t addr, uint8_t val) {
-    gb->sram[addr] = val;
+    gb->sram[(gb->sram_bank * 0x2000) + addr] = val;
+    fseek(gb->sram_fp, 0L, SEEK_SET);
+    fwrite(gb->sram, 1,sizeof(gb->sram),gb->sram_fp);
 }

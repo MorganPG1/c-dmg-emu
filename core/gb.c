@@ -116,5 +116,8 @@ void GB_free(dmg_gameboy_t *gb) {
     if (gb->sdl_win) {
         SDL_DestroyWindow(gb->sdl_win);
     }
+    if (gb->sram_fp) {
+        fclose(gb->sram_fp);
+    }
     free(gb);
 }
