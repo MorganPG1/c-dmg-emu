@@ -143,7 +143,7 @@ typedef struct {
     bool debug;
 } dmg_gameboy_t;
 
-dmg_gameboy_t* init_gb(bool debug, const char* rom_path);
+dmg_gameboy_t* init_gb(bool debug, char* rom_path);
 void GB_log(const char* format, ...);
 void GB_log_err(const char* format, ...);
 void GB_stop_err(dmg_gameboy_t *gb, const char* format, ...);
