@@ -2,6 +2,21 @@
 
 Inspired by my latest project, py-dmg-emu, I have decided to attempt a rewrite in C. This is both because the python version is very slow but also because I want to improve my abilities to program in C.
 
-note for anyone reading this at its current stage: this is unfinished, no audio but i got graphics working so thats neat
+The emulator is currently as complete as the python one (+ some PPU tweaks).
 
-note 2: install SDL2 that'll be needed for build now, yes this readme is terrible, i'll clean it up later but i really cannot be bothered to do that rn
+This will probably not be updated by me for some time sadly; it is very hard for me to keep motivation for one project for a decent amount of time.
+
+## Building
+
+To build this do the following
+
+```
+cmake -B build
+cmake --build build
+```
+
+The only dependencies should be SDLv2 and the standard requirements for building anything.
+
+## Screenshots
+
+![pokemon red](scr1.png)
